@@ -50,13 +50,15 @@ export default function TimeInput({ value, onChange, label = 'Time', error }: Ti
   };
 
   return (
-    <div className="flex flex-col space-y-2">
-      <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
-        {label}
-      </label>
+    <div className="flex flex-col space-y-1">
+      {label && (
+        <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+          {label}
+        </label>
+      )}
       <div className="relative">
         <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-          <Clock className="h-5 w-5 text-gray-400" />
+          <Clock className="h-4 w-4 text-gray-400 dark:text-gray-500" />
         </div>
         <input
           type="time"
@@ -64,22 +66,23 @@ export default function TimeInput({ value, onChange, label = 'Time', error }: Ti
           onChange={handleChange}
           onBlur={handleBlur}
           className={`
-            block w-full pl-10 pr-3 py-2 border rounded-lg
-            focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent
-            transition-colors duration-200
+            block w-full pl-10 pr-3 py-2.5 border rounded-lg
+            focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent
+            transition-all duration-200
             ${!isValid || error
-              ? 'border-red-300 bg-red-50 dark:border-red-600 dark:bg-red-950'
-              : 'border-gray-300 bg-white dark:border-gray-600 dark:bg-gray-800'
+              ? 'border-red-300 bg-red-50 dark:border-red-600 dark:bg-red-950/50'
+              : 'border-slate-200 bg-white hover:border-slate-300 dark:border-slate-700 dark:bg-slate-800 dark:hover:border-slate-600'
             }
-            dark:text-white
+            text-slate-900 dark:text-white
+            placeholder-slate-400 dark:placeholder-slate-500
           `}
-          aria-label={label}
+          aria-label={label || 'Time'}
           aria-invalid={!isValid || !!error}
           aria-describedby={error ? `${label}-error` : undefined}
         />
       </div>
       {(error || (!isValid && localValue)) && (
-        <p id={`${label}-error`} className="text-sm text-red-600 dark:text-red-400">
+        <p id={`${label}-error`} className="text-xs text-red-600 dark:text-red-400">
           {error || 'Please enter a valid time in HH:MM format'}
         </p>
       )}

@@ -10,6 +10,7 @@ import { useState, useEffect } from 'react';
 import ShareModal from '@/components/ShareModal';
 import ImportModal from '@/components/ImportModal';
 import AddMedicationModal from '@/components/AddMedicationModal';
+import ClearConfirmModal from '@/components/ClearConfirmModal';
 import { Medication } from '@/types/medication';
 
 export default function Home() {
@@ -30,6 +31,7 @@ export default function Home() {
   const [showShareModal, setShowShareModal] = useState(false);
   const [showImportModal, setShowImportModal] = useState(false);
   const [showAddModal, setShowAddModal] = useState(false);
+  const [showClearModal, setShowClearModal] = useState(false);
   const [hoveredMedicationId, setHoveredMedicationId] = useState<string | null>(null);
 
   useEffect(() => {
@@ -93,78 +95,67 @@ export default function Home() {
                 Track your medications and never miss a dose
               </p>
             </div>
-            <div className="flex items-center space-x-2">
-              {/* Import/Share buttons */}
-              <div className="flex items-center space-x-1 mr-2">
-                <button
-                  onClick={() => setShowImportModal(true)}
-                  className="p-2 rounded-lg bg-emerald-50 dark:bg-emerald-950/50 hover:bg-emerald-100 dark:hover:bg-emerald-900/50 transition-all hover:shadow-md group relative"
-                  aria-label="Import schedule"
-                >
-                  <Upload className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
-                  <span className="absolute -bottom-8 left-1/2 transform -translate-x-1/2 text-xs bg-slate-900 dark:bg-slate-700 text-white px-2 py-1 rounded-md shadow-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none">
-                    Import
-                  </span>
-                </button>
-                <button
-                  onClick={() => setShowShareModal(true)}
-                  className="p-2 rounded-lg bg-violet-50 dark:bg-violet-950/50 hover:bg-violet-100 dark:hover:bg-violet-900/50 transition-all hover:shadow-md group relative"
-                  aria-label="Share/Export schedule"
-                  disabled={medications.length === 0}
-                >
-                  <Share2 className="w-5 h-5 text-violet-600 dark:text-violet-400" />
-                  <span className="absolute -bottom-8 left-1/2 transform -translate-x-1/2 text-xs bg-slate-900 dark:bg-slate-700 text-white px-2 py-1 rounded-md shadow-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none">
-                    Share/Export
-                  </span>
-                </button>
-              </div>
-              
-              {/* Theme and Clear buttons */}
-              <button
-                onClick={toggleDarkMode}
-                className="p-2 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 transition-all hover:shadow-md"
-                aria-label="Toggle dark mode"
-              >
-                {darkMode ? (
-                  <Sun className="w-5 h-5 text-yellow-500" />
-                ) : (
-                  <Moon className="w-5 h-5 text-gray-700" />
-                )}
-              </button>
-              {medications.length > 0 && (
-                <button
-                  onClick={clearAll}
-                  className="p-2 rounded-lg bg-rose-50 dark:bg-rose-950/50 hover:bg-rose-100 dark:hover:bg-rose-900/50 transition-all hover:shadow-md"
-                  aria-label="Clear all medications"
-                >
-                  <RefreshCw className="w-5 h-5 text-rose-600 dark:text-rose-400" />
-                </button>
+            {/* Theme button only in header */}
+            <button
+              onClick={toggleDarkMode}
+              className="p-2 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 transition-all hover:shadow-md"
+              aria-label="Toggle dark mode"
+            >
+              {darkMode ? (
+                <Sun className="w-5 h-5 text-yellow-500" />
+              ) : (
+                <Moon className="w-5 h-5 text-gray-700" />
               )}
-            </div>
+            </button>
           </div>
         </header>
 
+        {/* Action Buttons Row */}
+        <div className="flex justify-between gap-2 mb-6">
+          {/* Add Medication Button - Left */}
+          <button
+            onClick={() => setShowAddModal(true)}
+            className="flex items-center justify-center space-x-2 px-4 py-2 
+                     bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600
+                     text-white font-medium rounded-lg shadow-md hover:shadow-lg
+                     transition-all duration-200 transform hover:scale-[1.02]"
+          >
+            <Plus className="w-4 h-4" />
+            <span className="text-sm font-medium">Add Medication</span>
+          </button>
+
+          {/* Import/Export buttons - Right */}
+          <div className="flex gap-2">
+            <button
+              onClick={() => setShowImportModal(true)}
+              className="flex items-center justify-center space-x-2 px-3 py-2 rounded-lg bg-emerald-50 dark:bg-emerald-950/50 hover:bg-emerald-100 dark:hover:bg-emerald-900/50 transition-all hover:shadow-md"
+              aria-label="Import schedule"
+            >
+              <Upload className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+              <span className="text-sm font-medium text-emerald-700 dark:text-emerald-300">Import</span>
+            </button>
+            <button
+              onClick={() => setShowShareModal(true)}
+              className="flex items-center justify-center space-x-2 px-3 py-2 rounded-lg bg-violet-50 dark:bg-violet-950/50 hover:bg-violet-100 dark:hover:bg-violet-900/50 transition-all hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
+              aria-label="Share/Export schedule"
+              disabled={medications.length === 0}
+            >
+              <Share2 className="w-4 h-4 text-violet-600 dark:text-violet-400" />
+              <span className="text-sm font-medium text-violet-700 dark:text-violet-300">Export</span>
+            </button>
+          </div>
+        </div>
+
         {/* Main Content Grid */}
         <div className="grid lg:grid-cols-2 gap-6 mb-6">
-          {/* Left Column */}
-          <div className="space-y-6">
-            {/* Add Medication Button */}
-            <button
-              onClick={() => setShowAddModal(true)}
-              className="w-full flex items-center justify-center space-x-2 px-6 py-4 
-                       bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600
-                       text-white font-medium rounded-xl shadow-lg hover:shadow-xl
-                       transition-all duration-200 transform hover:scale-[1.02]"
-            >
-              <Plus className="w-5 h-5" />
-              <span className="text-lg">Add Medication</span>
-            </button>
-            
+          {/* Left Column - Medications */}
+          <div>
             <MedicationList 
               medications={medications} 
               onRemove={removeMedication}
               onUpdate={updateMedication}
               onHover={setHoveredMedicationId}
+              onClearAll={() => setShowClearModal(true)}
             />
           </div>
 
@@ -200,6 +191,14 @@ export default function Home() {
           onClose={() => setShowShareModal(false)}
           medications={medications}
           defaultStartTime={firstDoseTime}
+        />
+
+        {/* Clear Confirmation Modal */}
+        <ClearConfirmModal
+          isOpen={showClearModal}
+          onClose={() => setShowClearModal(false)}
+          onConfirm={clearAll}
+          medicationCount={medications.length}
         />
 
         {/* Footer */}

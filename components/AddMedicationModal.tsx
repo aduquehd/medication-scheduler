@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, FormEvent, useEffect } from 'react';
-import { X, Save, Plus, Clock, Hash, Info } from 'lucide-react';
+import { X, Save, Plus, Clock, Hash, Timer, RefreshCw } from 'lucide-react';
 import toast from 'react-hot-toast';
 import TimeInput from './TimeInput';
 
@@ -104,26 +104,6 @@ export default function AddMedicationModal({
         </div>
 
         <form onSubmit={(e) => handleSubmit(e, false)} className="p-6">
-          {/* Default Start Time Info */}
-          <div className="mb-6 p-4 bg-blue-50 dark:bg-blue-950/30 rounded-lg border border-blue-200 dark:border-blue-800">
-            <div className="flex items-start space-x-2">
-              <Info className="w-5 h-5 text-blue-600 dark:text-blue-400 flex-shrink-0 mt-0.5" />
-              <div className="flex-1">
-                <h3 className="text-sm font-medium text-blue-900 dark:text-blue-100 mb-2">
-                  Default Start Time
-                </h3>
-                <p className="text-xs text-blue-700 dark:text-blue-300 mb-3">
-                  This is the default start time for new medications. Each medication can have its own custom start time.
-                </p>
-                <TimeInput
-                  value={defaultStartTime}
-                  onChange={onUpdateDefaultTime}
-                  label="Default start time for new medications"
-                />
-              </div>
-            </div>
-          </div>
-
           <div className="space-y-4">
             {/* Medication Name */}
             <div>
@@ -207,6 +187,7 @@ export default function AddMedicationModal({
             {/* Dosing Interval */}
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                <Timer className="inline w-4 h-4 mr-1" />
                 Dosing Interval
               </label>
               
@@ -233,9 +214,10 @@ export default function AddMedicationModal({
                   <button
                     type="button"
                     onClick={() => setCustomInterval(true)}
-                    className="w-full text-sm text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 font-medium transition-colors"
+                    className="w-full text-sm flex items-center justify-center space-x-1 text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 font-medium transition-colors py-2 hover:bg-indigo-50 dark:hover:bg-indigo-950/30 rounded-lg"
                   >
-                    Use custom interval
+                    <RefreshCw className="w-3 h-3" />
+                    <span>Use custom interval</span>
                   </button>
                 </div>
               ) : (
@@ -264,9 +246,10 @@ export default function AddMedicationModal({
                       setCustomInterval(false);
                       setInterval('');
                     }}
-                    className="text-sm text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 font-medium transition-colors"
+                    className="text-sm flex items-center justify-center space-x-1 text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 font-medium transition-colors py-2 hover:bg-indigo-50 dark:hover:bg-indigo-950/30 rounded-lg"
                   >
-                    Use common intervals
+                    <RefreshCw className="w-3 h-3" />
+                    <span>Use common intervals</span>
                   </button>
                 </div>
               )}
@@ -274,41 +257,44 @@ export default function AddMedicationModal({
           </div>
 
           {/* Action Buttons */}
-          <div className="flex gap-3 mt-6 pt-6 border-t border-slate-200 dark:border-slate-700">
-            <button
-              type="button"
-              onClick={handleCancel}
-              className="px-4 py-2.5 border border-slate-300 dark:border-slate-600 
-                       text-slate-700 dark:text-slate-300 font-medium rounded-lg
-                       hover:bg-slate-50 dark:hover:bg-slate-800 transition-all duration-200"
-            >
-              Cancel
-            </button>
+          <div className="flex flex-col sm:flex-row gap-3 mt-6 pt-6 border-t border-slate-200 dark:border-slate-700">
             <button
               type="submit"
               disabled={!name || !interval}
               className="flex-1 flex items-center justify-center space-x-2 
-                       bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600
+                       bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700
                        disabled:from-slate-400 disabled:to-slate-400 dark:disabled:from-slate-600 dark:disabled:to-slate-600
-                       text-white font-medium py-2.5 px-4 rounded-lg shadow-md hover:shadow-lg
-                       transition-all duration-200 disabled:cursor-not-allowed disabled:shadow-none"
+                       text-white font-medium py-3 px-6 rounded-xl shadow-lg hover:shadow-xl
+                       transition-all duration-200 disabled:cursor-not-allowed disabled:shadow-none
+                       transform hover:scale-[1.02]"
             >
-              <Save className="w-4 h-4" />
-              <span>Save</span>
+              <Save className="w-5 h-5" />
+              <span className="text-base">Save Medication</span>
             </button>
-            <button
-              type="button"
-              onClick={(e) => handleSubmit(e as any, true)}
-              disabled={!name || !interval}
-              className="flex items-center justify-center space-x-2 px-4 py-2.5
-                       bg-gradient-to-r from-emerald-600 to-emerald-500 hover:from-emerald-700 hover:to-emerald-600
-                       disabled:from-slate-400 disabled:to-slate-400 dark:disabled:from-slate-600 dark:disabled:to-slate-600
-                       text-white font-medium rounded-lg shadow-md hover:shadow-lg
-                       transition-all duration-200 disabled:cursor-not-allowed disabled:shadow-none"
-            >
-              <Plus className="w-4 h-4" />
-              <span>Save & Add More</span>
-            </button>
+            <div className="flex gap-2">
+              <button
+                type="button"
+                onClick={(e) => handleSubmit(e as any, true)}
+                disabled={!name || !interval}
+                className="flex items-center justify-center space-x-2 px-4 py-3
+                         bg-gradient-to-r from-teal-500 to-emerald-500 hover:from-teal-600 hover:to-emerald-600
+                         disabled:from-slate-400 disabled:to-slate-400 dark:disabled:from-slate-600 dark:disabled:to-slate-600
+                         text-white font-medium rounded-xl shadow-md hover:shadow-lg
+                         transition-all duration-200 disabled:cursor-not-allowed disabled:shadow-none"
+              >
+                <Plus className="w-4 h-4" />
+                <span>Add Another</span>
+              </button>
+              <button
+                type="button"
+                onClick={handleCancel}
+                className="px-6 py-3 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700
+                         text-slate-700 dark:text-slate-300 font-medium rounded-xl
+                         transition-all duration-200 hover:shadow-md"
+              >
+                <span>Cancel</span>
+              </button>
+            </div>
           </div>
         </form>
       </div>
