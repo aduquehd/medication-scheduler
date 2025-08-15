@@ -51,7 +51,7 @@ export default function AddMedicationModal({
     setUseMaxDoses(false);
   };
 
-  const handleSubmit = (e: FormEvent, addAnother: boolean = false) => {
+  const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
 
     if (!name.trim()) {
@@ -73,13 +73,8 @@ export default function AddMedicationModal({
 
     onAdd(name.trim(), intervalValue, startTime, maxDoses);
     toast.success(`Added ${name.trim()} to schedule`);
-    
-    if (addAnother) {
-      resetForm();
-    } else {
-      resetForm();
-      onClose();
-    }
+    resetForm();
+    onClose();
   };
 
   const handleCancel = () => {
@@ -88,8 +83,14 @@ export default function AddMedicationModal({
   };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white dark:bg-slate-900 rounded-xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto border border-slate-200 dark:border-slate-800">
+    <div 
+      className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4"
+      onClick={handleCancel}
+    >
+      <div 
+        className="bg-white dark:bg-slate-900 rounded-xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto border border-slate-200 dark:border-slate-800"
+        onClick={(e) => e.stopPropagation()}
+      >
         <div className="flex items-center justify-between p-6 border-b border-slate-200 dark:border-slate-700">
           <h2 className="text-xl font-semibold text-gray-800 dark:text-white">
             Add Medication
@@ -103,7 +104,7 @@ export default function AddMedicationModal({
           </button>
         </div>
 
-        <form onSubmit={(e) => handleSubmit(e, false)} className="p-6">
+        <form onSubmit={handleSubmit} className="p-6">
           <div className="space-y-4">
             {/* Medication Name */}
             <div>
@@ -257,44 +258,20 @@ export default function AddMedicationModal({
           </div>
 
           {/* Action Buttons */}
-          <div className="flex flex-col sm:flex-row gap-3 mt-6 pt-6 border-t border-slate-200 dark:border-slate-700">
+          <div className="flex justify-end gap-3 mt-6 pt-6 border-t border-slate-200 dark:border-slate-700">
             <button
               type="submit"
               disabled={!name || !interval}
-              className="flex-1 flex items-center justify-center space-x-2 
-                       bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700
+              className="flex items-center justify-center space-x-2 px-6 py-3
+                       bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700
                        disabled:from-slate-400 disabled:to-slate-400 dark:disabled:from-slate-600 dark:disabled:to-slate-600
-                       text-white font-medium py-3 px-6 rounded-xl shadow-lg hover:shadow-xl
+                       text-white font-medium rounded-xl shadow-lg hover:shadow-xl
                        transition-all duration-200 disabled:cursor-not-allowed disabled:shadow-none
                        transform hover:scale-[1.02]"
             >
               <Save className="w-5 h-5" />
-              <span className="text-base">Save Medication</span>
+              <span>Save Medication</span>
             </button>
-            <div className="flex gap-2">
-              <button
-                type="button"
-                onClick={(e) => handleSubmit(e as any, true)}
-                disabled={!name || !interval}
-                className="flex items-center justify-center space-x-2 px-4 py-3
-                         bg-gradient-to-r from-teal-500 to-emerald-500 hover:from-teal-600 hover:to-emerald-600
-                         disabled:from-slate-400 disabled:to-slate-400 dark:disabled:from-slate-600 dark:disabled:to-slate-600
-                         text-white font-medium rounded-xl shadow-md hover:shadow-lg
-                         transition-all duration-200 disabled:cursor-not-allowed disabled:shadow-none"
-              >
-                <Plus className="w-4 h-4" />
-                <span>Add Another</span>
-              </button>
-              <button
-                type="button"
-                onClick={handleCancel}
-                className="px-6 py-3 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700
-                         text-slate-700 dark:text-slate-300 font-medium rounded-xl
-                         transition-all duration-200 hover:shadow-md"
-              >
-                <span>Cancel</span>
-              </button>
-            </div>
           </div>
         </form>
       </div>

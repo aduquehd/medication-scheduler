@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { Medication } from '@/types/medication';
-import { Trash2, Pill, Clock, Calendar, Edit2, RefreshCw, RotateCw } from 'lucide-react';
+import { Pill, Calendar, RefreshCw, RotateCw } from 'lucide-react';
 import { formatTimeDisplay } from '@/utils/timeCalculations';
 import toast from 'react-hot-toast';
 import EditMedicationModal from './EditMedicationModal';
@@ -18,12 +18,8 @@ interface MedicationListProps {
 export default function MedicationList({ medications, onRemove, onUpdate, onHover, onClearAll }: MedicationListProps) {
   const [editingMedication, setEditingMedication] = useState<Medication | null>(null);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-  const handleRemove = (medication: Medication) => {
-    onRemove(medication.id);
-    toast.success(`Removed ${medication.name} from schedule`);
-  };
 
-  const handleEdit = (medication: Medication) => {
+  const handleCardClick = (medication: Medication) => {
     setEditingMedication(medication);
     setIsEditModalOpen(true);
   };
@@ -72,9 +68,11 @@ export default function MedicationList({ medications, onRemove, onUpdate, onHove
             className="relative flex flex-row p-3 sm:flex-col sm:p-4 rounded-lg border 
                      sm:border-2 hover:shadow-md sm:hover:shadow-lg sm:hover:scale-[1.01]
                      transition-all duration-200 group bg-white dark:bg-slate-800/50
-                     border-slate-200 dark:border-slate-700 hover:border-blue-300 dark:hover:border-blue-600"
+                     border-slate-200 dark:border-slate-700 hover:border-indigo-400 dark:hover:border-indigo-500
+                     cursor-pointer"
             onMouseEnter={() => onHover?.(medication.id)}
             onMouseLeave={() => onHover?.(null)}
+            onClick={() => handleCardClick(medication)}
           >
             {/* Color indicator bar */}
             <div className={`absolute left-0 top-0 bottom-0 w-1 sm:w-2 ${medication.color} rounded-l-lg`} />
@@ -86,8 +84,8 @@ export default function MedicationList({ medications, onRemove, onUpdate, onHove
             
             {/* Content */}
             <div className="ml-2 sm:ml-4 flex-1">
-              {/* Desktop: Name at top with pill icon and actions */}
-              <div className="hidden sm:flex sm:items-center sm:justify-between sm:mb-3">
+              {/* Desktop: Name at top with pill icon */}
+              <div className="hidden sm:flex sm:items-center sm:mb-3">
                 <div className="flex items-center space-x-2">
                   <div className={`w-8 h-8 rounded-full ${medication.color} flex items-center justify-center flex-shrink-0`}>
                     <Pill className="w-4 h-4 text-white" />
@@ -96,53 +94,15 @@ export default function MedicationList({ medications, onRemove, onUpdate, onHove
                     {medication.name}
                   </h3>
                 </div>
-                {/* Desktop action buttons */}
-                <div className="flex items-center space-x-1 opacity-0 group-hover:opacity-100 transition-all duration-200">
-                  <button
-                    onClick={() => handleEdit(medication)}
-                    className="p-1.5 text-gray-400 hover:text-blue-500 dark:text-gray-500 dark:hover:text-blue-400 
-                             hover:bg-blue-50 dark:hover:bg-blue-950 rounded-lg"
-                    aria-label={`Edit ${medication.name}`}
-                  >
-                    <Edit2 className="w-4 h-4" />
-                  </button>
-                  <button
-                    onClick={() => handleRemove(medication)}
-                    className="p-1.5 text-gray-400 hover:text-red-500 dark:text-gray-500 dark:hover:text-red-400 
-                             hover:bg-red-50 dark:hover:bg-red-950 rounded-lg"
-                    aria-label={`Remove ${medication.name}`}
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </button>
-                </div>
               </div>
 
               {/* Mobile: Stack layout, Desktop: Compact info */}
               <div className="flex-1">
-                {/* Mobile Name with actions */}
+                {/* Mobile Name */}
                 <div className="flex items-center justify-between mb-1 sm:hidden">
                   <h3 className="font-semibold text-gray-900 dark:text-white text-base">
                     {medication.name}
                   </h3>
-                  {/* Mobile action buttons */}
-                  <div className="flex items-center space-x-1">
-                    <button
-                      onClick={() => handleEdit(medication)}
-                      className="p-1 text-gray-400 hover:text-blue-500 dark:text-gray-500 dark:hover:text-blue-400 
-                               hover:bg-blue-50 dark:hover:bg-blue-950 rounded-lg"
-                      aria-label={`Edit ${medication.name}`}
-                    >
-                      <Edit2 className="w-3 h-3" />
-                    </button>
-                    <button
-                      onClick={() => handleRemove(medication)}
-                      className="p-1 text-gray-400 hover:text-red-500 dark:text-gray-500 dark:hover:text-red-400 
-                               hover:bg-red-50 dark:hover:bg-red-950 rounded-lg"
-                      aria-label={`Remove ${medication.name}`}
-                    >
-                      <Trash2 className="w-3 h-3" />
-                    </button>
-                  </div>
                 </div>
 
                 {/* Medication details */}
@@ -181,12 +141,15 @@ export default function MedicationList({ medications, onRemove, onUpdate, onHove
                   </div>
                   
                   {/* Column 2: Start time */}
-                  <div className="flex items-center">
+                  <div>
                     {medication.startTime && (
-                      <>
-                        <Calendar className="w-4 h-4 mr-1.5 text-gray-400 dark:text-gray-500" />
-                        <span>{formatTimeDisplay(medication.startTime)}</span>
-                      </>
+                      <div className="space-y-1">
+                        <div className="text-xs text-gray-500 dark:text-gray-500">Starts at</div>
+                        <div className="flex items-center">
+                          <Calendar className="w-4 h-4 mr-1.5 text-gray-400 dark:text-gray-500" />
+                          <span>{formatTimeDisplay(medication.startTime)}</span>
+                        </div>
+                      </div>
                     )}
                   </div>
                 </div>
@@ -209,6 +172,7 @@ export default function MedicationList({ medications, onRemove, onUpdate, onHove
         isOpen={isEditModalOpen}
         onClose={handleCloseModal}
         onUpdate={onUpdate}
+        onDelete={onRemove}
       />
     </div>
   );

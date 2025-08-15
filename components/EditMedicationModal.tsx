@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, FormEvent, useEffect } from 'react';
-import { X, Save, Clock, Hash } from 'lucide-react';
+import { X, Save, Clock, Hash, Trash2, Timer, RefreshCw, Pill } from 'lucide-react';
 import toast from 'react-hot-toast';
 import TimeInput from './TimeInput';
 import { Medication } from '@/types/medication';
@@ -11,6 +11,7 @@ interface EditMedicationModalProps {
   isOpen: boolean;
   onClose: () => void;
   onUpdate: (id: string, name: string, interval: number, startTime: string, maxDosesPerDay?: number) => void;
+  onDelete?: (id: string) => void;
 }
 
 const COMMON_INTERVALS = [
@@ -21,13 +22,14 @@ const COMMON_INTERVALS = [
   { label: 'Once daily', value: 24 },
 ];
 
-export default function EditMedicationModal({ medication, isOpen, onClose, onUpdate }: EditMedicationModalProps) {
+export default function EditMedicationModal({ medication, isOpen, onClose, onUpdate, onDelete }: EditMedicationModalProps) {
   const [name, setName] = useState('');
   const [interval, setInterval] = useState('');
   const [customInterval, setCustomInterval] = useState(false);
   const [startTime, setStartTime] = useState('08:00');
   const [maxDosesPerDay, setMaxDosesPerDay] = useState('');
   const [useMaxDoses, setUseMaxDoses] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
   useEffect(() => {
     if (medication) {
@@ -76,9 +78,24 @@ export default function EditMedicationModal({ medication, isOpen, onClose, onUpd
     onClose();
   };
 
+  const handleDelete = () => {
+    if (medication && onDelete) {
+      onDelete(medication.id);
+      toast.success(`Removed ${medication.name} from schedule`);
+      setShowDeleteConfirm(false);
+      onClose();
+    }
+  };
+
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white dark:bg-slate-900 rounded-xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto border border-slate-200 dark:border-slate-800">
+    <div 
+      className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4"
+      onClick={onClose}
+    >
+      <div 
+        className="bg-white dark:bg-slate-900 rounded-xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto border border-slate-200 dark:border-slate-800"
+        onClick={(e) => e.stopPropagation()}
+      >
         <div className="flex items-center justify-between p-6 border-b border-slate-200 dark:border-slate-700">
           <h2 className="text-xl font-semibold text-gray-800 dark:text-white">
             Edit Medication
@@ -133,7 +150,7 @@ export default function EditMedicationModal({ medication, isOpen, onClose, onUpd
 
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                <Hash className="inline w-4 h-4 mr-1" />
+                <Pill className="inline w-4 h-4 mr-1" />
                 Max Doses Per Day
               </label>
               <div className="space-y-2">
@@ -170,6 +187,7 @@ export default function EditMedicationModal({ medication, isOpen, onClose, onUpd
 
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              <Timer className="inline w-4 h-4 mr-1" />
               Dosing Interval
             </label>
             
@@ -184,8 +202,8 @@ export default function EditMedicationModal({ medication, isOpen, onClose, onUpd
                       className={`
                         px-3 py-2 rounded-lg border transition-all duration-200
                         ${interval === option.value.toString()
-                          ? 'bg-blue-600 text-white border-blue-600 shadow-md'
-                          : 'bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:border-blue-500 dark:hover:border-blue-400 hover:shadow-sm'
+                          ? 'bg-indigo-600 text-white border-indigo-600 shadow-md'
+                          : 'bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:border-indigo-500 dark:hover:border-indigo-400 hover:shadow-sm'
                         }
                       `}
                     >
@@ -196,9 +214,10 @@ export default function EditMedicationModal({ medication, isOpen, onClose, onUpd
                 <button
                   type="button"
                   onClick={() => setCustomInterval(true)}
-                  className="w-full text-sm text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 font-medium transition-colors"
+                  className="w-full text-sm flex items-center justify-center space-x-1 text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 font-medium transition-colors py-2 hover:bg-indigo-50 dark:hover:bg-indigo-950/30 rounded-lg"
                 >
-                  Use custom interval
+                  <RefreshCw className="w-3 h-3" />
+                  <span>Use custom interval</span>
                 </button>
               </div>
             ) : (
@@ -227,32 +246,40 @@ export default function EditMedicationModal({ medication, isOpen, onClose, onUpd
                     setCustomInterval(false);
                     setInterval('');
                   }}
-                  className="text-sm text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 font-medium transition-colors"
+                  className="text-sm flex items-center justify-center space-x-1 text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 font-medium transition-colors py-2 hover:bg-indigo-50 dark:hover:bg-indigo-950/30 rounded-lg"
                 >
-                  Use common intervals
+                  <RefreshCw className="w-3 h-3" />
+                  <span>Use common intervals</span>
                 </button>
               </div>
             )}
           </div>
 
-          <div className="flex gap-3 pt-4">
-            <button
-              type="button"
-              onClick={onClose}
-              className="flex-1 px-4 py-3 border border-slate-300 dark:border-slate-600 
-                       text-slate-700 dark:text-slate-300 font-medium rounded-lg
-                       hover:bg-slate-50 dark:hover:bg-slate-800 transition-all duration-200"
-            >
-              Cancel
-            </button>
+          <div className="flex justify-between gap-3 pt-4">
+            {/* Delete button on the left */}
+            {onDelete && (
+              <button
+                type="button"
+                onClick={() => setShowDeleteConfirm(true)}
+                className="flex items-center space-x-2 px-4 py-3 bg-red-50 dark:bg-red-950/30 hover:bg-red-100 dark:hover:bg-red-950/50
+                         text-red-700 dark:text-red-400 font-medium rounded-xl
+                         transition-all duration-200 hover:shadow-md"
+              >
+                <Trash2 className="w-5 h-5" />
+                <span>Delete</span>
+              </button>
+            )}
+            
+            {/* Save button on the right */}
             <button
               type="submit"
               disabled={!name || !interval}
-              className="flex-1 flex items-center justify-center space-x-2 
-                       bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600
+              className="ml-auto flex items-center justify-center space-x-2 px-6 py-3
+                       bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700
                        disabled:from-slate-400 disabled:to-slate-400 dark:disabled:from-slate-600 dark:disabled:to-slate-600
-                       text-white font-medium py-3 px-4 rounded-lg shadow-md hover:shadow-lg
-                       transition-all duration-200 disabled:cursor-not-allowed disabled:shadow-none"
+                       text-white font-medium rounded-xl shadow-lg hover:shadow-xl
+                       transition-all duration-200 disabled:cursor-not-allowed disabled:shadow-none
+                       transform hover:scale-[1.02]"
             >
               <Save className="w-5 h-5" />
               <span>Save Changes</span>
@@ -260,6 +287,51 @@ export default function EditMedicationModal({ medication, isOpen, onClose, onUpd
           </div>
         </form>
       </div>
+
+      {/* Delete Confirmation Modal */}
+      {showDeleteConfirm && (
+        <div 
+          className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-[60] p-4"
+          onClick={() => setShowDeleteConfirm(false)}
+        >
+          <div 
+            className="bg-white dark:bg-slate-900 rounded-xl shadow-2xl max-w-md w-full border border-slate-200 dark:border-slate-800"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="p-6">
+              <div className="flex justify-center mb-4">
+                <div className="w-16 h-16 bg-red-100 dark:bg-red-950/30 rounded-full flex items-center justify-center">
+                  <Trash2 className="w-8 h-8 text-red-600 dark:text-red-400" />
+                </div>
+              </div>
+              <h3 className="text-xl font-semibold text-center text-gray-800 dark:text-white mb-2">
+                Delete Medication?
+              </h3>
+              <p className="text-center text-gray-600 dark:text-gray-400 mb-6">
+                Are you sure you want to delete <span className="font-semibold">{medication?.name}</span>? This action cannot be undone.
+              </p>
+              <div className="flex gap-3">
+                <button
+                  onClick={() => setShowDeleteConfirm(false)}
+                  className="flex-1 px-4 py-2.5 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700
+                           text-slate-700 dark:text-slate-300 font-medium rounded-lg
+                           transition-all duration-200"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleDelete}
+                  className="flex-1 px-4 py-2.5 bg-gradient-to-r from-red-600 to-red-500 hover:from-red-700 hover:to-red-600
+                           text-white font-medium rounded-lg shadow-md hover:shadow-lg
+                           transition-all duration-200"
+                >
+                  Delete
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
