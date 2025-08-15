@@ -1,0 +1,265 @@
+'use client';
+
+import { useState, FormEvent, useEffect } from 'react';
+import { X, Save, Clock, Hash } from 'lucide-react';
+import toast from 'react-hot-toast';
+import TimeInput from './TimeInput';
+import { Medication } from '@/types/medication';
+
+interface EditMedicationModalProps {
+  medication: Medication | null;
+  isOpen: boolean;
+  onClose: () => void;
+  onUpdate: (id: string, name: string, interval: number, startTime: string, maxDosesPerDay?: number) => void;
+}
+
+const COMMON_INTERVALS = [
+  { label: 'Every 4 hours', value: 4 },
+  { label: 'Every 6 hours', value: 6 },
+  { label: 'Every 8 hours', value: 8 },
+  { label: 'Every 12 hours', value: 12 },
+  { label: 'Once daily', value: 24 },
+];
+
+export default function EditMedicationModal({ medication, isOpen, onClose, onUpdate }: EditMedicationModalProps) {
+  const [name, setName] = useState('');
+  const [interval, setInterval] = useState('');
+  const [customInterval, setCustomInterval] = useState(false);
+  const [startTime, setStartTime] = useState('08:00');
+  const [maxDosesPerDay, setMaxDosesPerDay] = useState('');
+  const [useMaxDoses, setUseMaxDoses] = useState(false);
+
+  useEffect(() => {
+    if (medication) {
+      setName(medication.name);
+      setInterval(medication.interval.toString());
+      setStartTime(medication.startTime || '08:00');
+      
+      // Check if interval is custom
+      const isCommon = COMMON_INTERVALS.some(i => i.value === medication.interval);
+      setCustomInterval(!isCommon);
+      
+      if (medication.maxDosesPerDay) {
+        setMaxDosesPerDay(medication.maxDosesPerDay.toString());
+        setUseMaxDoses(true);
+      } else {
+        setMaxDosesPerDay('');
+        setUseMaxDoses(false);
+      }
+    }
+  }, [medication]);
+
+  if (!isOpen || !medication) return null;
+
+  const handleSubmit = (e: FormEvent) => {
+    e.preventDefault();
+
+    if (!name.trim()) {
+      toast.error('Please enter a medication name');
+      return;
+    }
+
+    const intervalValue = parseFloat(interval);
+    if (!intervalValue || intervalValue <= 0 || intervalValue > 48) {
+      toast.error('Please enter a valid interval between 0 and 48 hours');
+      return;
+    }
+
+    const maxDoses = useMaxDoses && maxDosesPerDay ? parseInt(maxDosesPerDay) : undefined;
+    if (useMaxDoses && (!maxDoses || maxDoses < 1 || maxDoses > 10)) {
+      toast.error('Please enter a valid max doses between 1 and 10');
+      return;
+    }
+
+    onUpdate(medication.id, name.trim(), intervalValue, startTime, maxDoses);
+    toast.success(`Updated ${name.trim()}`);
+    onClose();
+  };
+
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+      <div className="bg-white dark:bg-slate-900 rounded-xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto border border-slate-200 dark:border-slate-800">
+        <div className="flex items-center justify-between p-6 border-b border-slate-200 dark:border-slate-700">
+          <h2 className="text-xl font-semibold text-gray-800 dark:text-white">
+            Edit Medication
+          </h2>
+          <button
+            onClick={onClose}
+            className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-all hover:shadow-md"
+            aria-label="Close modal"
+          >
+            <X className="w-5 h-5 text-gray-500 dark:text-gray-400" />
+          </button>
+        </div>
+
+        <form onSubmit={handleSubmit} className="p-6 space-y-4">
+          <div>
+            <label 
+              htmlFor="edit-medication-name" 
+              className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
+            >
+              Medication Name
+            </label>
+            <input
+              id="edit-medication-name"
+              type="text"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder="e.g., Aspirin, Ibuprofen"
+              className="w-full px-4 py-2 border border-slate-200 dark:border-slate-700 rounded-lg 
+                       focus:ring-2 focus:ring-blue-500 focus:border-transparent
+                       bg-white dark:bg-slate-800 text-slate-900 dark:text-white
+                       placeholder-slate-400 dark:placeholder-slate-500
+                       transition-all duration-200 hover:border-slate-300 dark:hover:border-slate-600"
+              aria-label="Medication name"
+            />
+          </div>
+
+          <div className="grid md:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                <Clock className="inline w-4 h-4 mr-1" />
+                Start Time
+              </label>
+              <TimeInput
+                value={startTime}
+                onChange={setStartTime}
+                label=""
+              />
+              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                When to take the first dose
+              </p>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                <Hash className="inline w-4 h-4 mr-1" />
+                Max Doses Per Day
+              </label>
+              <div className="space-y-2">
+                <div className="flex items-center space-x-2">
+                  <input
+                    type="checkbox"
+                    id="edit-use-max-doses"
+                    checked={useMaxDoses}
+                    onChange={(e) => setUseMaxDoses(e.target.checked)}
+                    className="rounded border-gray-300 text-blue-500 focus:ring-blue-500"
+                  />
+                  <label htmlFor="edit-use-max-doses" className="text-sm text-gray-600 dark:text-gray-400">
+                    Limit daily doses
+                  </label>
+                </div>
+                {useMaxDoses && (
+                  <input
+                    type="number"
+                    value={maxDosesPerDay}
+                    onChange={(e) => setMaxDosesPerDay(e.target.value)}
+                    placeholder="e.g., 3"
+                    min="1"
+                    max="10"
+                    className="w-full px-3 py-2 border border-slate-200 dark:border-slate-700 rounded-lg 
+                             focus:ring-2 focus:ring-blue-500 focus:border-transparent
+                             bg-white dark:bg-slate-800 text-slate-900 dark:text-white
+                             transition-all duration-200 hover:border-slate-300 dark:hover:border-slate-600"
+                    aria-label="Maximum doses per day"
+                  />
+                )}
+              </div>
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              Dosing Interval
+            </label>
+            
+            {!customInterval ? (
+              <div className="space-y-2">
+                <div className="grid grid-cols-2 gap-2">
+                  {COMMON_INTERVALS.map((option) => (
+                    <button
+                      key={option.value}
+                      type="button"
+                      onClick={() => setInterval(option.value.toString())}
+                      className={`
+                        px-3 py-2 rounded-lg border transition-all duration-200
+                        ${interval === option.value.toString()
+                          ? 'bg-blue-600 text-white border-blue-600 shadow-md'
+                          : 'bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:border-blue-500 dark:hover:border-blue-400 hover:shadow-sm'
+                        }
+                      `}
+                    >
+                      {option.label}
+                    </button>
+                  ))}
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setCustomInterval(true)}
+                  className="w-full text-sm text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 font-medium transition-colors"
+                >
+                  Use custom interval
+                </button>
+              </div>
+            ) : (
+              <div className="space-y-2">
+                <div className="flex items-center space-x-2">
+                  <span className="text-sm text-gray-600 dark:text-gray-400">Every</span>
+                  <input
+                    type="number"
+                    value={interval}
+                    onChange={(e) => setInterval(e.target.value)}
+                    placeholder="6"
+                    step="0.5"
+                    min="0.5"
+                    max="48"
+                    className="w-20 px-3 py-2 border border-slate-200 dark:border-slate-700 rounded-lg 
+                             focus:ring-2 focus:ring-blue-500 focus:border-transparent
+                             bg-white dark:bg-slate-800 text-slate-900 dark:text-white
+                             transition-all duration-200 hover:border-slate-300 dark:hover:border-slate-600"
+                    aria-label="Interval hours"
+                  />
+                  <span className="text-sm text-gray-600 dark:text-gray-400">hours</span>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setCustomInterval(false);
+                    setInterval('');
+                  }}
+                  className="text-sm text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 font-medium transition-colors"
+                >
+                  Use common intervals
+                </button>
+              </div>
+            )}
+          </div>
+
+          <div className="flex gap-3 pt-4">
+            <button
+              type="button"
+              onClick={onClose}
+              className="flex-1 px-4 py-3 border border-slate-300 dark:border-slate-600 
+                       text-slate-700 dark:text-slate-300 font-medium rounded-lg
+                       hover:bg-slate-50 dark:hover:bg-slate-800 transition-all duration-200"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              disabled={!name || !interval}
+              className="flex-1 flex items-center justify-center space-x-2 
+                       bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600
+                       disabled:from-slate-400 disabled:to-slate-400 dark:disabled:from-slate-600 dark:disabled:to-slate-600
+                       text-white font-medium py-3 px-4 rounded-lg shadow-md hover:shadow-lg
+                       transition-all duration-200 disabled:cursor-not-allowed disabled:shadow-none"
+            >
+              <Save className="w-5 h-5" />
+              <span>Save Changes</span>
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+}

@@ -1,0 +1,138 @@
+'use client';
+
+import { useState, useEffect } from 'react';
+import { Copy, Check, X, Share2 } from 'lucide-react';
+import toast from 'react-hot-toast';
+import { Medication } from '@/types/medication';
+import { ScheduleExport } from '@/utils/importExport';
+
+interface ShareModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  medications: Medication[];
+  defaultStartTime: string;
+}
+
+export default function ShareModal({ isOpen, onClose, medications, defaultStartTime }: ShareModalProps) {
+  const [copied, setCopied] = useState(false);
+  const [canShare, setCanShare] = useState(false);
+
+  useEffect(() => {
+    setCanShare(typeof navigator !== 'undefined' && 'share' in navigator);
+  }, []);
+
+  if (!isOpen) return null;
+
+  const exportData: ScheduleExport = {
+    version: '1.0',
+    exportDate: new Date().toISOString(),
+    defaultStartTime,
+    medications
+  };
+
+  const jsonString = JSON.stringify(exportData, null, 2);
+
+  const handleCopy = async () => {
+    try {
+      await navigator.clipboard.writeText(jsonString);
+      setCopied(true);
+      toast.success('Copied to clipboard!');
+      setTimeout(() => setCopied(false), 2000);
+    } catch (error) {
+      toast.error('Failed to copy to clipboard');
+    }
+  };
+
+  const handleShare = async () => {
+    if (typeof navigator !== 'undefined' && navigator.share) {
+      try {
+        const blob = new Blob([jsonString], { type: 'application/json' });
+        const file = new File([blob], `medication-schedule-${new Date().toISOString().split('T')[0]}.json`, { type: 'application/json' });
+        
+        await navigator.share({
+          title: 'Medication Schedule',
+          text: 'My medication schedule',
+          files: [file]
+        });
+      } catch (error) {
+        if ((error as Error).name !== 'AbortError') {
+          toast.error('Failed to share');
+        }
+      }
+    } else {
+      toast.error('Sharing is not supported on this device');
+    }
+  };
+
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+      <div className="bg-white dark:bg-slate-900 rounded-xl shadow-2xl max-w-2xl w-full max-h-[80vh] overflow-hidden border border-slate-200 dark:border-slate-800">
+        <div className="flex items-center justify-between p-6 border-b border-slate-200 dark:border-slate-700">
+          <h2 className="text-xl font-semibold text-gray-800 dark:text-white flex items-center space-x-2">
+            <Share2 className="w-5 h-5" />
+            <span>Share Schedule</span>
+          </h2>
+          <button
+            onClick={onClose}
+            className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-all hover:shadow-md"
+            aria-label="Close modal"
+          >
+            <X className="w-5 h-5 text-gray-500 dark:text-gray-400" />
+          </button>
+        </div>
+
+        <div className="p-6 space-y-4">
+          <div>
+            <p className="text-sm text-gray-600 dark:text-gray-400 mb-3">
+              Share your medication schedule as JSON data. You can copy it or use your device's share feature.
+            </p>
+            
+            <div className="bg-slate-50 dark:bg-slate-800/50 rounded-lg p-4 relative border border-slate-200 dark:border-slate-700">
+              <pre className="text-xs text-gray-800 dark:text-gray-200 overflow-x-auto max-h-96 overflow-y-auto">
+                {jsonString}
+              </pre>
+            </div>
+          </div>
+
+          <div className="flex flex-col sm:flex-row gap-3">
+            <button
+              onClick={handleCopy}
+              className="flex-1 flex items-center justify-center space-x-2 px-4 py-2 bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 text-white rounded-lg shadow-md hover:shadow-lg transition-all"
+            >
+              {copied ? (
+                <>
+                  <Check className="w-4 h-4" />
+                  <span>Copied!</span>
+                </>
+              ) : (
+                <>
+                  <Copy className="w-4 h-4" />
+                  <span>Copy to Clipboard</span>
+                </>
+              )}
+            </button>
+
+            {canShare && (
+              <button
+                onClick={handleShare}
+                className="flex-1 flex items-center justify-center space-x-2 px-4 py-2 bg-gradient-to-r from-emerald-600 to-emerald-500 hover:from-emerald-700 hover:to-emerald-600 text-white rounded-lg shadow-md hover:shadow-lg transition-all"
+              >
+                <Share2 className="w-4 h-4" />
+                <span>Share</span>
+              </button>
+            )}
+          </div>
+
+          <div className="text-xs text-slate-500 dark:text-slate-400 border-t border-slate-200 dark:border-slate-700 pt-4">
+            <p className="font-semibold mb-1">How to import:</p>
+            <ol className="list-decimal list-inside space-y-1">
+              <li>Save this JSON data to a file</li>
+              <li>Click the Import button in the app</li>
+              <li>Select your saved JSON file</li>
+            </ol>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
