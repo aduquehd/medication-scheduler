@@ -29,13 +29,17 @@ export const exportSchedule = (medications: Medication[], defaultStartTime: stri
   URL.revokeObjectURL(url);
 };
 
-export const validateImportData = (data: any): { valid: boolean; errors: string[] } => {
+export const validateImportData = (data: any): {
+  isValid: boolean;
+  error?: string;
+  medications?: Medication[];
+  defaultStartTime?: string;
+} => {
   const errors: string[] = [];
 
   // Check basic structure
   if (!data || typeof data !== 'object') {
-    errors.push('Invalid JSON structure');
-    return { valid: false, errors };
+    return { isValid: false, error: 'Invalid JSON structure' };
   }
 
   // Check version
@@ -74,9 +78,28 @@ export const validateImportData = (data: any): { valid: boolean; errors: string[
     });
   }
 
+  if (errors.length > 0) {
+    return {
+      isValid: false,
+      error: errors.join('\n')
+    };
+  }
+
+  // Generate new IDs and colors for imported medications
+  const importedMedications: Medication[] = data.medications.map((med: any, index: number) => ({
+    id: Date.now().toString() + '-' + index,
+    name: med.name,
+    interval: med.interval,
+    startTime: med.startTime,
+    maxDosesPerDay: med.maxDosesPerDay,
+    color: med.color || `bg-blue-500`, // Will be reassigned in the hook
+    createdAt: new Date().toISOString()
+  }));
+
   return {
-    valid: errors.length === 0,
-    errors
+    isValid: true,
+    medications: importedMedications,
+    defaultStartTime: data.defaultStartTime
   };
 };
 
@@ -89,23 +112,14 @@ export const importSchedule = (
     const data = JSON.parse(fileContent);
     const validation = validateImportData(data);
     
-    if (!validation.valid) {
-      onError(`Import failed:\n${validation.errors.join('\n')}`);
+    if (!validation.isValid) {
+      onError(validation.error || 'Import failed');
       return;
     }
 
-    // Generate new IDs and colors for imported medications
-    const importedMedications: Medication[] = data.medications.map((med: any, index: number) => ({
-      id: Date.now().toString() + '-' + index,
-      name: med.name,
-      interval: med.interval,
-      startTime: med.startTime,
-      maxDosesPerDay: med.maxDosesPerDay,
-      color: med.color || `bg-blue-500`, // Will be reassigned in the hook
-      createdAt: new Date().toISOString()
-    }));
-
-    onSuccess(importedMedications, data.defaultStartTime);
+    if (validation.medications && validation.defaultStartTime) {
+      onSuccess(validation.medications, validation.defaultStartTime);
+    }
   } catch (error) {
     onError(`Failed to parse JSON file: ${error instanceof Error ? error.message : 'Unknown error'}`);
   }

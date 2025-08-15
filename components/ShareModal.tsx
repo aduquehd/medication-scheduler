@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Copy, Check, X, Share2 } from 'lucide-react';
+import { Copy, Check, X, Share2, Download } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { Medication } from '@/types/medication';
 import { ScheduleExport } from '@/utils/importExport';
@@ -41,6 +41,19 @@ export default function ShareModal({ isOpen, onClose, medications, defaultStartT
     } catch (error) {
       toast.error('Failed to copy to clipboard');
     }
+  };
+
+  const handleDownload = () => {
+    const blob = new Blob([jsonString], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `medication-schedule-${new Date().toISOString().split('T')[0]}.json`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    toast.success('Schedule downloaded!');
   };
 
   const handleShare = async () => {
@@ -107,9 +120,17 @@ export default function ShareModal({ isOpen, onClose, medications, defaultStartT
               ) : (
                 <>
                   <Copy className="w-4 h-4" />
-                  <span>Copy to Clipboard</span>
+                  <span>Copy</span>
                 </>
               )}
+            </button>
+
+            <button
+              onClick={handleDownload}
+              className="flex-1 flex items-center justify-center space-x-2 px-4 py-2 bg-gradient-to-r from-violet-600 to-violet-500 hover:from-violet-700 hover:to-violet-600 text-white rounded-lg shadow-md hover:shadow-lg transition-all"
+            >
+              <Download className="w-4 h-4" />
+              <span>Download</span>
             </button>
 
             {canShare && (
@@ -126,9 +147,9 @@ export default function ShareModal({ isOpen, onClose, medications, defaultStartT
           <div className="text-xs text-slate-500 dark:text-slate-400 border-t border-slate-200 dark:border-slate-700 pt-4">
             <p className="font-semibold mb-1">How to import:</p>
             <ol className="list-decimal list-inside space-y-1">
-              <li>Save this JSON data to a file</li>
+              <li>Copy the JSON data or download the file</li>
               <li>Click the Import button in the app</li>
-              <li>Select your saved JSON file</li>
+              <li>Either paste the JSON directly or upload the file</li>
             </ol>
           </div>
         </div>

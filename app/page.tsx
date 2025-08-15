@@ -2,15 +2,15 @@
 
 import { Toaster } from 'react-hot-toast';
 import toast from 'react-hot-toast';
-import MedicationForm from '@/components/MedicationForm';
 import MedicationList from '@/components/MedicationList';
 import ScheduleDisplay from '@/components/ScheduleDisplay';
-import TimeInput from '@/components/TimeInput';
 import { useMedicationSchedule } from '@/hooks/useMedicationSchedule';
-import { exportSchedule, handleFileSelect } from '@/utils/importExport';
-import { RefreshCw, Sun, Moon, Download, Upload, Share2 } from 'lucide-react';
-import { useState, useEffect, useRef } from 'react';
+import { RefreshCw, Sun, Moon, Upload, Share2, Plus } from 'lucide-react';
+import { useState, useEffect } from 'react';
 import ShareModal from '@/components/ShareModal';
+import ImportModal from '@/components/ImportModal';
+import AddMedicationModal from '@/components/AddMedicationModal';
+import { Medication } from '@/types/medication';
 
 export default function Home() {
   const {
@@ -28,8 +28,9 @@ export default function Home() {
 
   const [darkMode, setDarkMode] = useState(false);
   const [showShareModal, setShowShareModal] = useState(false);
+  const [showImportModal, setShowImportModal] = useState(false);
+  const [showAddModal, setShowAddModal] = useState(false);
   const [hoveredMedicationId, setHoveredMedicationId] = useState<string | null>(null);
-  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     // Check for saved theme preference or default to light mode
@@ -58,37 +59,8 @@ export default function Home() {
     }
   };
 
-  const handleExport = () => {
-    if (medications.length === 0) {
-      toast.error('No medications to export');
-      return;
-    }
-    exportSchedule(medications, firstDoseTime);
-    toast.success('Schedule exported successfully');
-  };
-
-  const handleImport = () => {
-    fileInputRef.current?.click();
-  };
-
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      handleFileSelect(
-        file,
-        (importedMeds, importedStartTime) => {
-          importMedications(importedMeds, importedStartTime);
-          toast.success(`Imported ${importedMeds.length} medication${importedMeds.length !== 1 ? 's' : ''}`);
-        },
-        (error) => {
-          toast.error(error);
-        }
-      );
-    }
-    // Reset file input
-    if (e.target) {
-      e.target.value = '';
-    }
+  const handleImportMedications = (medications: Medication[], defaultStartTime: string) => {
+    importMedications(medications, defaultStartTime);
   };
 
   if (isLoading) {
@@ -122,10 +94,10 @@ export default function Home() {
               </p>
             </div>
             <div className="flex items-center space-x-2">
-              {/* Import/Export buttons */}
+              {/* Import/Share buttons */}
               <div className="flex items-center space-x-1 mr-2">
                 <button
-                  onClick={handleImport}
+                  onClick={() => setShowImportModal(true)}
                   className="p-2 rounded-lg bg-emerald-50 dark:bg-emerald-950/50 hover:bg-emerald-100 dark:hover:bg-emerald-900/50 transition-all hover:shadow-md group relative"
                   aria-label="Import schedule"
                 >
@@ -135,25 +107,14 @@ export default function Home() {
                   </span>
                 </button>
                 <button
-                  onClick={handleExport}
-                  className="p-2 rounded-lg bg-blue-50 dark:bg-blue-950/50 hover:bg-blue-100 dark:hover:bg-blue-900/50 transition-all hover:shadow-md group relative"
-                  aria-label="Export schedule"
-                  disabled={medications.length === 0}
-                >
-                  <Download className="w-5 h-5 text-blue-600 dark:text-blue-400" />
-                  <span className="absolute -bottom-8 left-1/2 transform -translate-x-1/2 text-xs bg-slate-900 dark:bg-slate-700 text-white px-2 py-1 rounded-md shadow-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none">
-                    Export
-                  </span>
-                </button>
-                <button
                   onClick={() => setShowShareModal(true)}
                   className="p-2 rounded-lg bg-violet-50 dark:bg-violet-950/50 hover:bg-violet-100 dark:hover:bg-violet-900/50 transition-all hover:shadow-md group relative"
-                  aria-label="Share schedule"
+                  aria-label="Share/Export schedule"
                   disabled={medications.length === 0}
                 >
                   <Share2 className="w-5 h-5 text-violet-600 dark:text-violet-400" />
                   <span className="absolute -bottom-8 left-1/2 transform -translate-x-1/2 text-xs bg-slate-900 dark:bg-slate-700 text-white px-2 py-1 rounded-md shadow-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none">
-                    Share
+                    Share/Export
                   </span>
                 </button>
               </div>
@@ -183,26 +144,22 @@ export default function Home() {
           </div>
         </header>
 
-        {/* Global Default Start Time Setting */}
-        <div className="mb-6 bg-white dark:bg-slate-900 rounded-xl shadow-lg hover:shadow-xl p-6 transition-all duration-200 border border-slate-100 dark:border-slate-800">
-          <h2 className="text-xl font-semibold mb-4 text-gray-800 dark:text-white">
-            Default Start Time
-          </h2>
-          <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
-            Set the default start time for new medications. Each medication can have its own custom start time.
-          </p>
-          <TimeInput
-            value={firstDoseTime}
-            onChange={updateFirstDoseTime}
-            label="Default start time"
-          />
-        </div>
-
         {/* Main Content Grid */}
         <div className="grid lg:grid-cols-2 gap-6 mb-6">
           {/* Left Column */}
           <div className="space-y-6">
-            <MedicationForm onAdd={addMedication} defaultStartTime={firstDoseTime} />
+            {/* Add Medication Button */}
+            <button
+              onClick={() => setShowAddModal(true)}
+              className="w-full flex items-center justify-center space-x-2 px-6 py-4 
+                       bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600
+                       text-white font-medium rounded-xl shadow-lg hover:shadow-xl
+                       transition-all duration-200 transform hover:scale-[1.02]"
+            >
+              <Plus className="w-5 h-5" />
+              <span className="text-lg">Add Medication</span>
+            </button>
+            
             <MedicationList 
               medications={medications} 
               onRemove={removeMedication}
@@ -221,14 +178,20 @@ export default function Home() {
           </div>
         </div>
 
-        {/* Hidden file input for import */}
-        <input
-          ref={fileInputRef}
-          type="file"
-          accept=".json,application/json"
-          onChange={handleFileChange}
-          className="hidden"
-          aria-label="Import JSON file"
+        {/* Add Medication Modal */}
+        <AddMedicationModal
+          isOpen={showAddModal}
+          onClose={() => setShowAddModal(false)}
+          onAdd={addMedication}
+          defaultStartTime={firstDoseTime}
+          onUpdateDefaultTime={updateFirstDoseTime}
+        />
+
+        {/* Import Modal */}
+        <ImportModal
+          isOpen={showImportModal}
+          onClose={() => setShowImportModal(false)}
+          onImport={handleImportMedications}
         />
 
         {/* Share Modal */}
