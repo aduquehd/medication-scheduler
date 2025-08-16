@@ -89,8 +89,24 @@ export default function Home() {
       <div className="container mx-auto px-4 py-8 max-w-7xl">
         {/* Header */}
         <header className="mb-8">
-          {/* Title row - same for mobile and desktop */}
-          <div className="flex items-center justify-between mb-4">
+          {/* Mobile: Toggle buttons at the very top */}
+          <div className="flex justify-end space-x-2 sm:hidden mb-2">
+            <LanguageSwitcher />
+            <button
+              onClick={toggleDarkMode}
+              className="p-2 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 transition-all hover:shadow-md"
+              aria-label="Toggle dark mode"
+            >
+              {darkMode ? (
+                <Sun className="w-5 h-5 text-amber-500" />
+              ) : (
+                <Moon className="w-5 h-5 text-gray-700" />
+              )}
+            </button>
+          </div>
+          
+          {/* Title row */}
+          <div className="flex items-center justify-between">
             <div className="flex items-center space-x-3">
               <img 
                 src="/medication-scheduler-logo.png" 
@@ -116,22 +132,6 @@ export default function Home() {
                 )}
               </button>
             </div>
-          </div>
-          
-          {/* Mobile: Toggle buttons below title */}
-          <div className="flex justify-end space-x-2 sm:hidden">
-            <LanguageSwitcher />
-            <button
-              onClick={toggleDarkMode}
-              className="p-2 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 transition-all hover:shadow-md"
-              aria-label="Toggle dark mode"
-            >
-              {darkMode ? (
-                <Sun className="w-5 h-5 text-amber-500" />
-              ) : (
-                <Moon className="w-5 h-5 text-gray-700" />
-              )}
-            </button>
           </div>
         </header>
 
