@@ -154,8 +154,57 @@ export default function ScheduleDisplay({ schedule, firstDoseTime, hoveredMedica
             (index === sortedGroups.length - 1 || sortedGroups[index + 1].isNextDay);
           const showLineAfter = isLastTodayDose && currentTimeInMinutes >= groupTimeInMinutes;
           
+          // Calculate missing hours between previous dose and current dose
+          const missingHours: number[] = [];
+          if (index > 0 && !group.isNextDay) {
+            const prevGroup = sortedGroups[index - 1];
+            if (!prevGroup.isNextDay) {
+              const [prevHour] = prevGroup.time.split(':').map(Number);
+              const [currentGroupHour] = group.time.split(':').map(Number);
+              
+              // Add all whole hours between previous and current dose
+              for (let h = prevHour + 1; h < currentGroupHour; h++) {
+                missingHours.push(h);
+              }
+            }
+          } else if (index === 0 && !group.isNextDay) {
+            // Add missing hours before first dose (from start of day)
+            const [firstHour] = group.time.split(':').map(Number);
+            const startHour = Math.max(0, firstHour - 3); // Show up to 3 hours before first dose
+            for (let h = startHour; h < firstHour; h++) {
+              missingHours.push(h);
+            }
+          }
+          
           return (
             <React.Fragment key={`${group.time}-${group.isNextDay}-${index}`}>
+              {/* Show missing hour lines before this dose */}
+              {missingHours.map((hour) => {
+                const hourTime = new Date();
+                hourTime.setHours(hour, 0, 0, 0);
+                const hourTimeInMinutes = hour * 60;
+                const shouldShowNowHere = !group.isNextDay && currentTimeInMinutes >= hourTimeInMinutes && currentTimeInMinutes < hourTimeInMinutes + 60;
+                
+                return shouldShowNowHere ? (
+                  // Show NOW line instead of missing hour if current time is in this hour
+                  <div key={`now-${hour}`} className="flex items-center space-x-2 -my-2">
+                    <div className="flex items-center space-x-2">
+                      <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse" />
+                      <span className="text-xs font-bold text-red-500 whitespace-nowrap">
+                        NOW - {now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
+                      </span>
+                    </div>
+                    <div className="flex-1 h-0.5 bg-gradient-to-r from-red-500 via-red-300 to-transparent" />
+                  </div>
+                ) : (
+                  <div key={`missing-${hour}`} className="flex items-center space-x-2 -my-2">
+                    <span className="text-xs text-gray-400 dark:text-gray-500 whitespace-nowrap min-w-[65px]">
+                      {hourTime.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })}
+                    </span>
+                    <div className="flex-1 h-px bg-gradient-to-r from-gray-300 via-gray-200 to-transparent dark:from-gray-600 dark:via-gray-700" />
+                  </div>
+                );
+              })}
               {showTimeLine && (
                 <div className="flex items-center space-x-2 -my-2">
                   <div className="flex items-center space-x-2">
@@ -255,6 +304,42 @@ export default function ScheduleDisplay({ schedule, firstDoseTime, hoveredMedica
                   <div className="flex-1 h-0.5 bg-gradient-to-r from-red-500 via-red-300 to-transparent" />
                 </div>
               )}
+              {/* Show missing hours after the last dose of today */}
+              {isLastTodayDose && !showLineAfter && (() => {
+                const missingHoursAfter: number[] = [];
+                const [lastHour] = group.time.split(':').map(Number);
+                const endHour = Math.min(23, lastHour + 3); // Show up to 3 hours after last dose or until 11 PM
+                
+                for (let h = lastHour + 1; h <= endHour; h++) {
+                  missingHoursAfter.push(h);
+                }
+                
+                return missingHoursAfter.map((hour) => {
+                  const hourTime = new Date();
+                  hourTime.setHours(hour, 0, 0, 0);
+                  const hourTimeInMinutes = hour * 60;
+                  const shouldShowNowHere = currentTimeInMinutes >= hourTimeInMinutes && currentTimeInMinutes < hourTimeInMinutes + 60;
+                  
+                  return shouldShowNowHere ? (
+                    <div key={`now-after-${hour}`} className="flex items-center space-x-2 -my-2">
+                      <div className="flex items-center space-x-2">
+                        <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse" />
+                        <span className="text-xs font-bold text-red-500 whitespace-nowrap">
+                          NOW - {now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
+                        </span>
+                      </div>
+                      <div className="flex-1 h-0.5 bg-gradient-to-r from-red-500 via-red-300 to-transparent" />
+                    </div>
+                  ) : (
+                    <div key={`missing-after-${hour}`} className="flex items-center space-x-2 -my-2">
+                      <span className="text-xs text-gray-400 dark:text-gray-500 whitespace-nowrap min-w-[65px]">
+                        {hourTime.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })}
+                      </span>
+                      <div className="flex-1 h-px bg-gradient-to-r from-gray-300 via-gray-200 to-transparent dark:from-gray-600 dark:via-gray-700" />
+                    </div>
+                  );
+                });
+              })()}
             </React.Fragment>
           );
         })}
