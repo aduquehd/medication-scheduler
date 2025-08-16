@@ -145,37 +145,32 @@ export default function MedicationForm({ onAdd, defaultStartTime }: MedicationFo
             Dosing Interval
           </label>
           
-          {!customInterval ? (
-            <div className="space-y-2">
-              <div className="grid grid-cols-2 gap-2">
-                {COMMON_INTERVALS.map((option) => (
-                  <button
-                    key={option.value}
-                    type="button"
-                    onClick={() => setInterval(option.value.toString())}
-                    className={`
-                      px-3 py-2 rounded-lg border transition-all duration-200
-                      ${interval === option.value.toString()
-                        ? 'bg-blue-600 text-white border-blue-600 shadow-md'
-                        : 'bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:border-blue-500 dark:hover:border-blue-400 hover:shadow-sm'
-                      }
-                    `}
-                  >
-                    {option.label}
-                  </button>
-                ))}
-              </div>
-              <button
-                type="button"
-                onClick={() => setCustomInterval(true)}
-                className="w-full text-sm text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 font-medium transition-colors"
-              >
-                Use custom interval
-              </button>
+          <div className="space-y-2">
+            <div className="grid grid-cols-2 gap-2">
+              {COMMON_INTERVALS.map((option) => (
+                <button
+                  key={option.value}
+                  type="button"
+                  onClick={() => {
+                    setInterval(option.value.toString());
+                    setCustomInterval(false);
+                  }}
+                  className={`
+                    px-3 py-2 rounded-lg border transition-all duration-200
+                    ${interval === option.value.toString() && !customInterval
+                      ? 'bg-blue-600 text-white border-blue-600 shadow-md'
+                      : 'bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:border-blue-500 dark:hover:border-blue-400 hover:shadow-sm'
+                    }
+                  `}
+                >
+                  {option.label}
+                </button>
+              ))}
             </div>
-          ) : (
-            <div className="space-y-2">
-              <div className="flex items-center space-x-2">
+            
+            {/* Custom interval section */}
+            {customInterval && (
+              <div className="flex items-center space-x-2 p-3 bg-blue-50 dark:bg-blue-950/30 rounded-lg border-2 border-blue-500">
                 <span className="text-sm text-gray-600 dark:text-gray-400">Every</span>
                 <input
                   type="number"
@@ -190,21 +185,28 @@ export default function MedicationForm({ onAdd, defaultStartTime }: MedicationFo
                            bg-white dark:bg-slate-800 text-slate-900 dark:text-white
                            transition-all duration-200 hover:border-slate-300 dark:hover:border-slate-600"
                   aria-label="Interval hours"
+                  autoFocus
                 />
                 <span className="text-sm text-gray-600 dark:text-gray-400">hours</span>
               </div>
-              <button
-                type="button"
-                onClick={() => {
+            )}
+            
+            <button
+              type="button"
+              onClick={() => {
+                if (customInterval) {
                   setCustomInterval(false);
                   setInterval('');
-                }}
-                className="text-sm text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 font-medium transition-colors"
-              >
-                Use common intervals
-              </button>
-            </div>
-          )}
+                } else {
+                  setCustomInterval(true);
+                  setInterval('');
+                }
+              }}
+              className="w-full text-sm text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 font-medium transition-colors"
+            >
+              {customInterval ? 'Hide custom interval' : 'Use custom interval'}
+            </button>
+          </div>
         </div>
 
         <button

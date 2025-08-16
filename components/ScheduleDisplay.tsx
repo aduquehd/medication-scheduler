@@ -1,19 +1,19 @@
 'use client';
 
 import { DoseSchedule } from '@/types/medication';
-import { formatTimeDisplay, getTimeUntilNextDose } from '@/utils/timeCalculations';
-import { Calendar, ChevronRight, Clock, AlertCircle } from 'lucide-react';
+import { formatTimeDisplay } from '@/utils/timeCalculations';
+import { Calendar, Clock, AlertCircle } from 'lucide-react';
 import { useEffect, useState } from 'react';
+import TimelineProgressBar from './TimelineProgressBar';
 
 interface ScheduleDisplayProps {
   schedule: DoseSchedule[];
   firstDoseTime: string;
-  hoveredMedicationId?: string | null;
+  hoveredMedicationIds?: string[];
 }
 
-export default function ScheduleDisplay({ schedule, firstDoseTime, hoveredMedicationId }: ScheduleDisplayProps) {
+export default function ScheduleDisplay({ schedule, firstDoseTime, hoveredMedicationIds }: ScheduleDisplayProps) {
   const [currentTime, setCurrentTime] = useState(new Date());
-  const [nextDoseTime, setNextDoseTime] = useState<string | null>(null);
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -22,10 +22,6 @@ export default function ScheduleDisplay({ schedule, firstDoseTime, hoveredMedica
 
     return () => clearInterval(timer);
   }, []);
-
-  useEffect(() => {
-    setNextDoseTime(getTimeUntilNextDose(schedule));
-  }, [schedule, currentTime]);
 
   if (schedule.length === 0) {
     return (
@@ -74,16 +70,10 @@ export default function ScheduleDisplay({ schedule, firstDoseTime, hoveredMedica
 
   return (
     <div className="bg-white dark:bg-slate-900 rounded-xl shadow-lg hover:shadow-xl p-6 transition-all duration-200 border border-slate-100 dark:border-slate-800">
-      <div className="flex items-center justify-between mb-4">
+      <div className="mb-4">
         <h2 className="text-xl font-semibold text-gray-800 dark:text-white">
           24-Hour Schedule
         </h2>
-        {nextDoseTime && (
-          <div className="flex items-center space-x-2 text-sm bg-blue-50 dark:bg-blue-950/50 text-blue-600 dark:text-blue-400 px-3 py-1.5 rounded-full font-medium">
-            <Clock className="w-4 h-4" />
-            <span>Next dose in {nextDoseTime}</span>
-          </div>
-        )}
       </div>
 
       {/* Real-time Clock */}
@@ -111,6 +101,11 @@ export default function ScheduleDisplay({ schedule, firstDoseTime, hoveredMedica
         </div>
       </div>
 
+      {/* Timeline Progress Bar */}
+      <div className="mb-4">
+        <TimelineProgressBar schedule={schedule} />
+      </div>
+
       <div className="mb-4 p-3 bg-slate-50 dark:bg-slate-800/50 rounded-lg border border-slate-200 dark:border-slate-700">
         <div className="flex items-center space-x-2 text-sm text-gray-600 dark:text-gray-400">
           <AlertCircle className="w-4 h-4" />
@@ -121,6 +116,9 @@ export default function ScheduleDisplay({ schedule, firstDoseTime, hoveredMedica
       <div className="space-y-4">
         {sortedGroups.map((group, index) => {
           const isCurrent = isCurrentDose(group.time, group.isNextDay);
+          const hasHighlightedMedication = group.doses.some(dose => 
+            hoveredMedicationIds?.includes(dose.medicationId)
+          );
           
           return (
             <div
@@ -129,6 +127,8 @@ export default function ScheduleDisplay({ schedule, firstDoseTime, hoveredMedica
                 border rounded-lg p-4 transition-all duration-200
                 ${isCurrent 
                   ? 'border-blue-400 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/30 dark:to-indigo-950/30 dark:border-blue-600 shadow-md' 
+                  : hasHighlightedMedication
+                  ? 'border-indigo-400 dark:border-indigo-500 bg-indigo-50/50 dark:bg-indigo-950/20 shadow-md'
                   : 'border-slate-200 dark:border-slate-700 hover:shadow-sm bg-white dark:bg-slate-800/50'
                 }
               `}
@@ -157,28 +157,27 @@ export default function ScheduleDisplay({ schedule, firstDoseTime, hoveredMedica
                 </div>
               </div>
 
-              <div className="space-y-2">
+              <div className="flex flex-wrap gap-2">
                 {group.doses.map((dose) => {
-                  const isHighlighted = hoveredMedicationId === dose.medicationId;
+                  const isHighlighted = hoveredMedicationIds?.includes(dose.medicationId) || false;
                   return (
                     <div
                       key={`${dose.medicationId}-${dose.doseNumber}`}
                       className={`
-                        flex items-center space-x-3 rounded-lg px-2 py-1 -mx-2 transition-all duration-200
+                        inline-flex items-center rounded-full pl-1 pr-2 py-0.5 transition-all duration-200 border
                         ${isHighlighted 
-                          ? 'bg-gradient-to-r from-slate-100 to-blue-50 dark:from-slate-700 dark:to-blue-900/30 scale-105 shadow-sm' 
-                          : ''
+                          ? 'bg-white dark:bg-slate-800 border-indigo-400 dark:border-indigo-500 shadow-sm scale-105' 
+                          : 'bg-white dark:bg-slate-800/50 border-slate-200 dark:border-slate-700'
                         }
                       `}
                     >
                       <div className={`
-                        ${isHighlighted ? 'w-3 h-3' : 'w-2 h-2'} 
-                        rounded-full ${dose.color} 
-                        ${isHighlighted ? 'ring-2 ring-offset-1 ring-slate-300 dark:ring-slate-600 dark:ring-offset-slate-800' : ''}
-                        transition-all duration-200
+                        ${isHighlighted ? 'w-2.5 h-2.5' : 'w-2 h-2'} 
+                        rounded-full ${dose.color}
+                        transition-all duration-200 mr-1.5
                       `} />
                       <span className={`
-                        text-sm transition-all duration-200
+                        text-xs transition-all duration-200
                         ${isHighlighted 
                           ? 'text-gray-900 dark:text-white font-semibold' 
                           : 'text-gray-700 dark:text-gray-300'
@@ -186,18 +185,14 @@ export default function ScheduleDisplay({ schedule, firstDoseTime, hoveredMedica
                       `}>
                         {dose.medicationName}
                       </span>
-                      <ChevronRight className={`
-                        w-3 h-3 transition-all duration-200
-                        ${isHighlighted ? 'text-blue-500 dark:text-blue-400' : 'text-gray-400'}
-                      `} />
                       <span className={`
-                        text-xs px-2 py-0.5 rounded font-medium transition-all duration-200
+                        ml-1 text-xs font-bold transition-all duration-200
                         ${isHighlighted 
-                          ? 'bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300' 
-                          : 'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-400'
+                          ? 'text-indigo-600 dark:text-indigo-400' 
+                          : 'text-slate-400 dark:text-slate-500'
                         }
                       `}>
-                        Dose #{dose.doseNumber}
+                        #{dose.doseNumber}
                       </span>
                     </div>
                   );

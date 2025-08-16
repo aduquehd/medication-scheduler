@@ -191,38 +191,32 @@ export default function EditMedicationModal({ medication, isOpen, onClose, onUpd
               Dosing Interval
             </label>
             
-            {!customInterval ? (
-              <div className="space-y-2">
-                <div className="grid grid-cols-2 gap-2">
-                  {COMMON_INTERVALS.map((option) => (
-                    <button
-                      key={option.value}
-                      type="button"
-                      onClick={() => setInterval(option.value.toString())}
-                      className={`
-                        px-3 py-2 rounded-lg border transition-all duration-200
-                        ${interval === option.value.toString()
-                          ? 'bg-indigo-600 text-white border-indigo-600 shadow-md'
-                          : 'bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:border-indigo-500 dark:hover:border-indigo-400 hover:shadow-sm'
-                        }
-                      `}
-                    >
-                      {option.label}
-                    </button>
-                  ))}
-                </div>
-                <button
-                  type="button"
-                  onClick={() => setCustomInterval(true)}
-                  className="w-full text-sm flex items-center justify-center space-x-1 text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 font-medium transition-colors py-2 hover:bg-indigo-50 dark:hover:bg-indigo-950/30 rounded-lg"
-                >
-                  <RefreshCw className="w-3 h-3" />
-                  <span>Use custom interval</span>
-                </button>
+            <div className="space-y-2">
+              <div className="grid grid-cols-2 gap-2">
+                {COMMON_INTERVALS.map((option) => (
+                  <button
+                    key={option.value}
+                    type="button"
+                    onClick={() => {
+                      setInterval(option.value.toString());
+                      setCustomInterval(false);
+                    }}
+                    className={`
+                      px-3 py-2 rounded-lg border transition-all duration-200
+                      ${interval === option.value.toString() && !customInterval
+                        ? 'bg-indigo-600 text-white border-indigo-600 shadow-md'
+                        : 'bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:border-indigo-500 dark:hover:border-indigo-400 hover:shadow-sm'
+                      }
+                    `}
+                  >
+                    {option.label}
+                  </button>
+                ))}
               </div>
-            ) : (
-              <div className="space-y-2">
-                <div className="flex items-center space-x-2">
+              
+              {/* Custom interval section */}
+              {customInterval && (
+                <div className="flex items-center space-x-2 p-3 bg-indigo-50 dark:bg-indigo-950/30 rounded-lg border-2 border-indigo-500">
                   <span className="text-sm text-gray-600 dark:text-gray-400">Every</span>
                   <input
                     type="number"
@@ -233,26 +227,33 @@ export default function EditMedicationModal({ medication, isOpen, onClose, onUpd
                     min="0.5"
                     max="48"
                     className="w-20 px-3 py-2 border border-slate-200 dark:border-slate-700 rounded-lg 
-                             focus:ring-2 focus:ring-blue-500 focus:border-transparent
+                             focus:ring-2 focus:ring-indigo-500 focus:border-transparent
                              bg-white dark:bg-slate-800 text-slate-900 dark:text-white
                              transition-all duration-200 hover:border-slate-300 dark:hover:border-slate-600"
                     aria-label="Interval hours"
+                    autoFocus
                   />
                   <span className="text-sm text-gray-600 dark:text-gray-400">hours</span>
                 </div>
-                <button
-                  type="button"
-                  onClick={() => {
+              )}
+              
+              <button
+                type="button"
+                onClick={() => {
+                  if (customInterval) {
                     setCustomInterval(false);
                     setInterval('');
-                  }}
-                  className="text-sm flex items-center justify-center space-x-1 text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 font-medium transition-colors py-2 hover:bg-indigo-50 dark:hover:bg-indigo-950/30 rounded-lg"
-                >
-                  <RefreshCw className="w-3 h-3" />
-                  <span>Use common intervals</span>
-                </button>
-              </div>
-            )}
+                  } else {
+                    setCustomInterval(true);
+                    setInterval('');
+                  }
+                }}
+                className="w-full text-sm flex items-center justify-center space-x-1 text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 font-medium transition-colors py-2 hover:bg-indigo-50 dark:hover:bg-indigo-950/30 rounded-lg"
+              >
+                <RefreshCw className="w-3 h-3" />
+                <span>{customInterval ? 'Hide custom interval' : 'Use custom interval'}</span>
+              </button>
+            </div>
           </div>
 
           <div className="flex justify-between gap-3 pt-4">

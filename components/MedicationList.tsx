@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { Medication } from '@/types/medication';
-import { Pill, Calendar, RefreshCw, RotateCw } from 'lucide-react';
+import { Pill, Calendar, RefreshCw, RotateCw, Edit2 } from 'lucide-react';
 import { formatTimeDisplay } from '@/utils/timeCalculations';
 import toast from 'react-hot-toast';
 import EditMedicationModal from './EditMedicationModal';
@@ -11,17 +11,44 @@ interface MedicationListProps {
   medications: Medication[];
   onRemove: (id: string) => void;
   onUpdate: (id: string, name: string, interval: number, startTime: string, maxDosesPerDay?: number) => void;
-  onHover?: (id: string | null) => void;
+  onHover?: (ids: string[]) => void;
   onClearAll?: () => void;
 }
 
 export default function MedicationList({ medications, onRemove, onUpdate, onHover, onClearAll }: MedicationListProps) {
   const [editingMedication, setEditingMedication] = useState<Medication | null>(null);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [selectedMedicationIds, setSelectedMedicationIds] = useState<Set<string>>(new Set());
 
-  const handleCardClick = (medication: Medication) => {
+  // Sort medications by start time
+  const sortedMedications = [...medications].sort((a, b) => {
+    const aTime = a.startTime.split(':').map(Number);
+    const bTime = b.startTime.split(':').map(Number);
+    const aMinutes = aTime[0] * 60 + aTime[1];
+    const bMinutes = bTime[0] * 60 + bTime[1];
+    return aMinutes - bMinutes;
+  });
+
+  const handleEditClick = (e: React.MouseEvent, medication: Medication) => {
+    e.stopPropagation();
     setEditingMedication(medication);
     setIsEditModalOpen(true);
+  };
+
+  const handleCardClick = (medicationId: string) => {
+    // Toggle selection for this medication
+    const newSet = new Set(selectedMedicationIds);
+    if (newSet.has(medicationId)) {
+      newSet.delete(medicationId);
+    } else {
+      newSet.add(medicationId);
+    }
+    
+    // Update state
+    setSelectedMedicationIds(newSet);
+    
+    // Update hover with all selected IDs
+    onHover?.(Array.from(newSet));
   };
 
   const handleCloseModal = () => {
@@ -62,20 +89,21 @@ export default function MedicationList({ medications, onRemove, onUpdate, onHove
       
       {/* Mobile: Compact list view, Desktop: 2 cards per row grid */}
       <div className="space-y-2 sm:grid sm:grid-cols-2 sm:gap-3 sm:space-y-0">
-        {medications.map((medication) => (
+        {sortedMedications.map((medication) => (
           <div
             key={medication.id}
-            className="relative flex flex-row p-3 sm:flex-col sm:p-4 rounded-lg border 
-                     sm:border-2 hover:shadow-md sm:hover:shadow-lg sm:hover:scale-[1.01]
-                     transition-all duration-200 group bg-white dark:bg-slate-800/50
-                     border-slate-200 dark:border-slate-700 hover:border-indigo-400 dark:hover:border-indigo-500
-                     cursor-pointer"
-            onMouseEnter={() => onHover?.(medication.id)}
-            onMouseLeave={() => onHover?.(null)}
-            onClick={() => handleCardClick(medication)}
+            className={`relative flex flex-row p-3 sm:flex-col sm:p-4 rounded-lg border-2
+                     hover:shadow-md sm:hover:shadow-lg sm:hover:scale-[1.01]
+                     transition-all duration-200 group
+                     cursor-pointer overflow-hidden
+                     ${selectedMedicationIds.has(medication.id) 
+                       ? 'border-indigo-500 dark:border-indigo-400 shadow-lg bg-gradient-to-r from-indigo-100 to-blue-100 dark:from-indigo-900/50 dark:to-blue-900/50 ring-2 ring-indigo-400/50 dark:ring-indigo-400/30' 
+                       : 'bg-white dark:bg-slate-800/50 border-slate-200 dark:border-slate-700 hover:border-indigo-300 dark:hover:border-indigo-500'
+                     }`}
+            onClick={() => handleCardClick(medication.id)}
           >
             {/* Color indicator bar */}
-            <div className={`absolute left-0 top-0 bottom-0 w-1 sm:w-2 ${medication.color} rounded-l-lg`} />
+            <div className={`absolute left-0 top-0 bottom-0 w-1 sm:w-2 ${medication.color}`} />
             
             {/* Mobile: Color dot with pill icon */}
             <div className={`w-10 h-10 rounded-full ${medication.color} flex items-center justify-center mr-3 flex-shrink-0 sm:hidden`}>
@@ -84,8 +112,8 @@ export default function MedicationList({ medications, onRemove, onUpdate, onHove
             
             {/* Content */}
             <div className="ml-2 sm:ml-4 flex-1">
-              {/* Desktop: Name at top with pill icon */}
-              <div className="hidden sm:flex sm:items-center sm:mb-3">
+              {/* Desktop: Name at top with pill icon and edit button */}
+              <div className="hidden sm:flex sm:items-center sm:justify-between sm:mb-3">
                 <div className="flex items-center space-x-2">
                   <div className={`w-8 h-8 rounded-full ${medication.color} flex items-center justify-center flex-shrink-0`}>
                     <Pill className="w-4 h-4 text-white" />
@@ -94,15 +122,31 @@ export default function MedicationList({ medications, onRemove, onUpdate, onHove
                     {medication.name}
                   </h3>
                 </div>
+                <button
+                  onClick={(e) => handleEditClick(e, medication)}
+                  className="p-1.5 text-gray-500 hover:text-indigo-700 dark:text-gray-400 dark:hover:text-indigo-300 
+                           hover:bg-indigo-100 dark:hover:bg-indigo-900/50 rounded-lg transition-all duration-200"
+                  aria-label={`Edit ${medication.name}`}
+                >
+                  <Edit2 className="w-4 h-4" />
+                </button>
               </div>
 
               {/* Mobile: Stack layout, Desktop: Compact info */}
               <div className="flex-1">
-                {/* Mobile Name */}
+                {/* Mobile Name with edit button */}
                 <div className="flex items-center justify-between mb-1 sm:hidden">
                   <h3 className="font-semibold text-gray-900 dark:text-white text-base">
                     {medication.name}
                   </h3>
+                  <button
+                    onClick={(e) => handleEditClick(e, medication)}
+                    className="p-1 text-gray-500 hover:text-indigo-700 dark:text-gray-400 dark:hover:text-indigo-300 
+                             hover:bg-indigo-100 dark:hover:bg-indigo-900/50 rounded-lg transition-all duration-200"
+                    aria-label={`Edit ${medication.name}`}
+                  >
+                    <Edit2 className="w-3 h-3" />
+                  </button>
                 </div>
 
                 {/* Medication details */}

@@ -32,7 +32,7 @@ export default function Home() {
   const [showImportModal, setShowImportModal] = useState(false);
   const [showAddModal, setShowAddModal] = useState(false);
   const [showClearModal, setShowClearModal] = useState(false);
-  const [hoveredMedicationId, setHoveredMedicationId] = useState<string | null>(null);
+  const [hoveredMedicationIds, setHoveredMedicationIds] = useState<string[]>([]);
 
   useEffect(() => {
     // Check for saved theme preference or default to light mode
@@ -86,6 +86,21 @@ export default function Home() {
       <div className="container mx-auto px-4 py-8 max-w-7xl">
         {/* Header */}
         <header className="mb-8">
+          {/* Mobile: Theme toggle at top */}
+          <div className="flex justify-end mb-4 sm:hidden">
+            <button
+              onClick={toggleDarkMode}
+              className="p-2 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 transition-all hover:shadow-md"
+              aria-label="Toggle dark mode"
+            >
+              {darkMode ? (
+                <Sun className="w-5 h-5 text-amber-500" />
+              ) : (
+                <Moon className="w-5 h-5 text-gray-700" />
+              )}
+            </button>
+          </div>
+          
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-3xl sm:text-4xl font-bold text-gray-800 dark:text-white mb-2">
@@ -95,14 +110,14 @@ export default function Home() {
                 Track your medications and never miss a dose
               </p>
             </div>
-            {/* Theme button only in header */}
+            {/* Desktop: Theme button in header */}
             <button
               onClick={toggleDarkMode}
-              className="p-2 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 transition-all hover:shadow-md"
+              className="hidden sm:block p-2 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 transition-all hover:shadow-md"
               aria-label="Toggle dark mode"
             >
               {darkMode ? (
-                <Sun className="w-5 h-5 text-yellow-500" />
+                <Sun className="w-5 h-5 text-amber-500" />
               ) : (
                 <Moon className="w-5 h-5 text-gray-700" />
               )}
@@ -154,7 +169,7 @@ export default function Home() {
               medications={medications} 
               onRemove={removeMedication}
               onUpdate={updateMedication}
-              onHover={setHoveredMedicationId}
+              onHover={setHoveredMedicationIds}
               onClearAll={() => setShowClearModal(true)}
             />
           </div>
@@ -164,7 +179,7 @@ export default function Home() {
             <ScheduleDisplay 
               schedule={schedule} 
               firstDoseTime={firstDoseTime}
-              hoveredMedicationId={hoveredMedicationId}
+              hoveredMedicationIds={hoveredMedicationIds}
             />
           </div>
         </div>
