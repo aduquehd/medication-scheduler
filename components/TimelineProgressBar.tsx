@@ -3,12 +3,14 @@
 import { useEffect, useState } from 'react';
 import { DoseSchedule } from '@/types/medication';
 import { Clock } from 'lucide-react';
+import { useTranslation } from '@/hooks/useTranslation';
 
 interface TimelineProgressBarProps {
   schedule: DoseSchedule[];
 }
 
 export default function TimelineProgressBar({ schedule }: TimelineProgressBarProps) {
+  const { t } = useTranslation();
   const [currentTime, setCurrentTime] = useState(new Date());
   const [nextDose, setNextDose] = useState<DoseSchedule | null>(null);
   const [timeUntilNext, setTimeUntilNext] = useState<string>('');
@@ -222,7 +224,7 @@ export default function TimelineProgressBar({ schedule }: TimelineProgressBarPro
         <div className="mt-4 p-3 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-lg text-white">
           <div className="text-center">
             <div className="text-xs uppercase tracking-wider opacity-90">
-              Next Dose In
+              {t.nextDoseIn}
             </div>
             <div className="text-2xl font-bold my-1">
               {timeUntilNext}
@@ -238,15 +240,15 @@ export default function TimelineProgressBar({ schedule }: TimelineProgressBarPro
       <div className="flex items-center justify-center space-x-4 mt-4 text-xs">
         <div className="flex items-center space-x-1">
           <div className="w-3 h-3 bg-green-500 rounded-full" />
-          <span className="text-gray-600 dark:text-gray-400">Completed</span>
+          <span className="text-gray-600 dark:text-gray-400">{t.completed}</span>
         </div>
         <div className="flex items-center space-x-1">
           <div className="w-3 h-3 bg-blue-500 rounded-full animate-pulse" />
-          <span className="text-gray-600 dark:text-gray-400">Next</span>
+          <span className="text-gray-600 dark:text-gray-400">{t.next}</span>
         </div>
         <div className="flex items-center space-x-1">
           <div className="w-3 h-3 bg-yellow-500 rounded-full" />
-          <span className="text-gray-600 dark:text-gray-400">Upcoming</span>
+          <span className="text-gray-600 dark:text-gray-400">{t.upcoming}</span>
         </div>
       </div>
     </div>

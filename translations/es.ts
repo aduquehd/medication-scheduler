@@ -10,12 +10,12 @@ export const es = {
   save: "Guardar",
   cancel: "Cancelar",
   delete: "Eliminar",
-  clearAll: "Borrar Todo",
+  clearAll: "Borrar",
   close: "Cerrar",
   edit: "Editar",
   
   // Medication List
-  yourMedications: "Tus Medicamentos",
+  yourMedications: "Medicamentos",
   noMedicationsYet: "No hay medicamentos agregados aún. ¡Agrega tu primer medicamento para comenzar!",
   totalMedications: "Total de medicamentos",
   every: "Cada",
@@ -48,9 +48,9 @@ export const es = {
   everyTwelveHours: "Cada 12 horas",
   onceDaily: "Una vez al día",
   custom: "Personalizado",
-  saveMedication: "Guardar Medicamento",
+  saveMedication: "Guardar",
   editMedication: "Editar Medicamento",
-  saveChanges: "Guardar Cambios",
+  saveChanges: "Guardar",
   deleteMedication: "¿Eliminar Medicamento?",
   deleteConfirmation: "¿Estás seguro de que quieres eliminar",
   cannotBeUndone: "Esta acción no se puede deshacer.",
@@ -62,15 +62,15 @@ export const es = {
   uploadFile: "Subir Archivo",
   pasteYourJSON: "Pega tus datos JSON aquí",
   paste: "Pegar",
-  importData: "Importar Datos",
+  importData: "Importar",
   loadSampleData: "Cargar Datos de Muestra",
   dropFileHere: "Suelta tu archivo JSON aquí o haz clic para buscar",
   chooseFile: "Elegir Archivo",
   acceptsJSON: "Acepta archivos .json exportados del Planificador de Medicamentos",
   importFormat: "Formato de Importación",
   importFormatDescription: "El archivo JSON debe contener tus medicamentos con sus horarios. Puedes exportar tu horario actual para ver el formato esperado, o usar los datos de muestra como referencia.",
-  downloadJSON: "Descargar JSON",
-  copyToClipboard: "Copiar al Portapapeles",
+  downloadJSON: "Descargar",
+  copyToClipboard: "Copiar",
   exportDescription: "Exporta tu horario de medicamentos para compartir o respaldar",
   copiedToClipboard: "¡Copiado al portapapeles!",
   exportedSuccessfully: "¡Horario exportado exitosamente!",
@@ -78,7 +78,7 @@ export const es = {
   // Clear Confirmation Modal
   clearAllMedications: "¿Borrar Todos los Medicamentos?",
   clearConfirmation: "¿Estás seguro de que quieres eliminar todos los medicamentos de tu horario? Esta acción no se puede deshacer.",
-  clearAllButton: "Borrar Todo",
+  clearAllButton: "Borrar",
   
   // Timeline Progress Bar
   nextDoseIn: "Próxima dosis en",
@@ -109,4 +109,15 @@ export const es = {
   // Time Display
   am: "AM",
   pm: "PM",
+  selectTime: "Seleccionar Hora",
+  confirm: "Confirmar",
+  
+  // Timeline Labels
+  completed: "Completado",
+  next: "Siguiente",
+  upcoming: "Próximo",
+  
+  // Footer
+  footerLine1: "Recuerda consultar con tu proveedor de salud sobre tu horario de medicamentos.",
+  footerLine2: "Esta herramienta es solo para fines organizativos y no reemplaza el consejo médico profesional.",
 } as const;

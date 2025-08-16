@@ -40,8 +40,7 @@ export default function Home() {
   useEffect(() => {
     // Check for saved theme preference or default to light mode
     const savedTheme = localStorage.getItem('theme');
-    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-    const isDark = savedTheme === 'dark' || (!savedTheme && prefersDark);
+    const isDark = savedTheme === 'dark';
     
     setDarkMode(isDark);
     if (isDark) {
@@ -86,37 +85,38 @@ export default function Home() {
         }}
       />
       
-      <div className="container mx-auto px-4 py-8 max-w-7xl">
+      <div className="container mx-auto px-4 pb-8 pt-4 max-w-7xl">
         {/* Header */}
         <header className="mb-8">
-          {/* Mobile: Toggle buttons at the very top */}
-          <div className="flex justify-end space-x-2 sm:hidden mb-2">
-            <LanguageSwitcher />
-            <button
-              onClick={toggleDarkMode}
-              className="p-2 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 transition-all hover:shadow-md"
-              aria-label="Toggle dark mode"
-            >
-              {darkMode ? (
-                <Sun className="w-5 h-5 text-amber-500" />
-              ) : (
-                <Moon className="w-5 h-5 text-gray-700" />
-              )}
-            </button>
-          </div>
-          
-          {/* Title row */}
           <div className="flex items-center justify-between">
+            {/* Logo and Title */}
             <div className="flex items-center space-x-3">
               <img 
                 src="/medication-scheduler-logo.png" 
                 alt="Medication Scheduler Logo" 
                 className="w-10 h-10 sm:w-12 sm:h-12 rounded-lg shadow-sm"
               />
-              <h1 className="text-2xl sm:text-3xl font-bold text-gray-800 dark:text-white">
+              <h1 className="text-xl sm:text-3xl font-bold text-gray-800 dark:text-white">
                 {t.appTitle}
               </h1>
             </div>
+            
+            {/* Mobile: Toggles stacked vertically */}
+            <div className="flex flex-col space-y-1 sm:hidden">
+              <LanguageSwitcher />
+              <button
+                onClick={toggleDarkMode}
+                className="p-2 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 transition-all hover:shadow-md"
+                aria-label="Toggle dark mode"
+              >
+                {darkMode ? (
+                  <Sun className="w-5 h-5 text-amber-500" />
+                ) : (
+                  <Moon className="w-5 h-5 text-gray-700" />
+                )}
+              </button>
+            </div>
+            
             {/* Desktop: Theme and Language buttons in header */}
             <div className="hidden sm:flex items-center space-x-2">
               <LanguageSwitcher />
@@ -271,10 +271,10 @@ export default function Home() {
         <footer className="mt-12 pt-8 border-t border-gray-200 dark:border-gray-700">
           <div className="text-center text-sm text-gray-500 dark:text-gray-400">
             <p>
-              Remember to consult with your healthcare provider about your medication schedule.
+              {t.footerLine1}
             </p>
             <p className="mt-2">
-              This tool is for organizational purposes only and does not replace professional medical advice.
+              {t.footerLine2}
             </p>
           </div>
         </footer>

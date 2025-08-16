@@ -5,7 +5,7 @@ import { X, Save, Clock, Hash, Trash2, Timer, RefreshCw, Pill } from 'lucide-rea
 import { useTranslation } from '@/hooks/useTranslation';
 import { getIntervalText } from '@/utils/translationHelpers';
 import toast from 'react-hot-toast';
-import TimeInput from './TimeInput';
+import TimePickerModal from './TimePickerModal';
 import { Medication } from '@/types/medication';
 
 interface EditMedicationModalProps {
@@ -141,10 +141,10 @@ export default function EditMedicationModal({ medication, isOpen, onClose, onUpd
                 <Clock className="inline w-4 h-4 mr-1" />
                 {t.startTime}
               </label>
-              <TimeInput
+              <TimePickerModal
                 value={startTime}
                 onChange={setStartTime}
-                label=""
+                label={t.selectTime}
               />
               <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
                 {t.whenToTakeFirstDose}

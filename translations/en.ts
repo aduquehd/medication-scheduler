@@ -10,12 +10,12 @@ export const en = {
   save: "Save",
   cancel: "Cancel",
   delete: "Delete",
-  clearAll: "Clear All",
+  clearAll: "Clear",
   close: "Close",
   edit: "Edit",
   
   // Medication List
-  yourMedications: "Your Medications",
+  yourMedications: "Medications",
   noMedicationsYet: "No medications added yet. Add your first medication to get started!",
   totalMedications: "Total medications",
   every: "Every",
@@ -48,9 +48,9 @@ export const en = {
   everyTwelveHours: "Every 12 hours",
   onceDaily: "Once daily",
   custom: "Custom",
-  saveMedication: "Save Medication",
+  saveMedication: "Save",
   editMedication: "Edit Medication",
-  saveChanges: "Save Changes",
+  saveChanges: "Save",
   deleteMedication: "Delete Medication?",
   deleteConfirmation: "Are you sure you want to delete",
   cannotBeUndone: "This action cannot be undone.",
@@ -62,15 +62,15 @@ export const en = {
   uploadFile: "Upload File",
   pasteYourJSON: "Paste your JSON data here",
   paste: "Paste",
-  importData: "Import Data",
+  importData: "Import",
   loadSampleData: "Load Sample Data",
   dropFileHere: "Drop your JSON file here or click to browse",
   chooseFile: "Choose File",
   acceptsJSON: "Accepts .json files exported from Medication Scheduler",
   importFormat: "Import Format",
   importFormatDescription: "The JSON file should contain your medications with their schedules. You can export your current schedule to see the expected format, or use the sample data as a reference.",
-  downloadJSON: "Download JSON",
-  copyToClipboard: "Copy to Clipboard",
+  downloadJSON: "Download",
+  copyToClipboard: "Copy",
   exportDescription: "Export your medication schedule to share or backup",
   copiedToClipboard: "Copied to clipboard!",
   exportedSuccessfully: "Schedule exported successfully!",
@@ -78,7 +78,7 @@ export const en = {
   // Clear Confirmation Modal
   clearAllMedications: "Clear All Medications?",
   clearConfirmation: "Are you sure you want to remove all medications from your schedule? This action cannot be undone.",
-  clearAllButton: "Clear All",
+  clearAllButton: "Clear",
   
   // Timeline Progress Bar
   nextDoseIn: "Next dose in",
@@ -109,6 +109,17 @@ export const en = {
   // Time Display
   am: "AM",
   pm: "PM",
+  selectTime: "Select Time",
+  confirm: "Confirm",
+  
+  // Timeline Labels
+  completed: "Completed",
+  next: "Next",
+  upcoming: "Upcoming",
+  
+  // Footer
+  footerLine1: "Remember to consult with your healthcare provider about your medication schedule.",
+  footerLine2: "This tool is for organizational purposes only and does not replace professional medical advice.",
 } as const;
 
 export type TranslationKey = keyof typeof en;

@@ -3,7 +3,7 @@
 import { useState, FormEvent, useEffect } from 'react';
 import { X, Save, Plus, Clock, Hash, Timer, RefreshCw } from 'lucide-react';
 import toast from 'react-hot-toast';
-import TimeInput from './TimeInput';
+import TimePickerModal from './TimePickerModal';
 import { useTranslation } from '@/hooks/useTranslation';
 import { getIntervalText } from '@/utils/translationHelpers';
 
@@ -140,10 +140,10 @@ export default function AddMedicationModal({
                   <Clock className="inline w-4 h-4 mr-1" />
                   {t.startTime}
                 </label>
-                <TimeInput
+                <TimePickerModal
                   value={startTime}
                   onChange={setStartTime}
-                  label=""
+                  label={t.selectTime}
                 />
                 <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
                   {t.whenToTakeFirstDose}

@@ -15,7 +15,7 @@ interface ScheduleDisplayProps {
 }
 
 export default function ScheduleDisplay({ schedule, firstDoseTime, hoveredMedicationIds }: ScheduleDisplayProps) {
-  const { t } = useTranslation();
+  const { t, language } = useTranslation();
   const [currentTime, setCurrentTime] = useState(new Date());
 
   useEffect(() => {
@@ -93,7 +93,7 @@ export default function ScheduleDisplay({ schedule, firstDoseTime, hoveredMedica
               })}
             </div>
             <div className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-              {currentTime.toLocaleDateString('en-US', { 
+              {currentTime.toLocaleDateString(language === 'es' ? 'es-ES' : 'en-US', { 
                 weekday: 'long',
                 year: 'numeric',
                 month: 'long',
