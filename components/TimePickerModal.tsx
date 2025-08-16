@@ -135,11 +135,48 @@ export default function TimePickerModal({ value, onChange, label }: TimePickerMo
                 >
                   <ChevronUp className="w-5 h-5 text-gray-600 dark:text-gray-400" />
                 </button>
-                <div className="my-2 px-4 py-3 bg-gray-50 dark:bg-slate-800 rounded-lg min-w-[70px] text-center">
-                  <span className="text-3xl font-bold text-gray-900 dark:text-white">
-                    {hours.toString().padStart(2, '0')}
-                  </span>
-                </div>
+                <input
+                  type="text"
+                  value={hours.toString().padStart(2, '0')}
+                  onChange={(e) => {
+                    const val = e.target.value.replace(/\D/g, '');
+                    if (val === '') {
+                      setHours(12);
+                    } else if (val.length <= 2) {
+                      const num = parseInt(val, 10);
+                      // Allow typing intermediate values, will validate on blur
+                      if (num === 0) {
+                        setHours(12);
+                      } else if (num <= 12) {
+                        setHours(num);
+                      } else if (val.length === 1) {
+                        // Allow single digit that might become valid (like "2" for "20")
+                        setHours(num);
+                      }
+                    }
+                  }}
+                  onBlur={(e) => {
+                    const val = e.target.value.replace(/\D/g, '');
+                    if (val === '' || val === '0') {
+                      setHours(12);
+                    } else {
+                      const num = parseInt(val, 10);
+                      if (num > 12) {
+                        setHours(12);
+                      } else if (num < 1) {
+                        setHours(1);
+                      } else {
+                        setHours(num);
+                      }
+                    }
+                  }}
+                  onFocus={(e) => e.target.select()}
+                  className="my-2 px-2 py-3 bg-gray-50 dark:bg-slate-800 rounded-lg w-[70px] text-center
+                           text-3xl font-bold text-gray-900 dark:text-white
+                           focus:outline-none focus:ring-2 focus:ring-blue-500
+                           hover:bg-gray-100 dark:hover:bg-slate-700 transition-colors"
+                  maxLength={2}
+                />
                 <button
                   type="button"
                   onClick={decrementHours}
@@ -165,11 +202,44 @@ export default function TimePickerModal({ value, onChange, label }: TimePickerMo
                 >
                   <ChevronUp className="w-5 h-5 text-gray-600 dark:text-gray-400" />
                 </button>
-                <div className="my-2 px-4 py-3 bg-gray-50 dark:bg-slate-800 rounded-lg min-w-[70px] text-center">
-                  <span className="text-3xl font-bold text-gray-900 dark:text-white">
-                    {minutes.toString().padStart(2, '0')}
-                  </span>
-                </div>
+                <input
+                  type="text"
+                  value={minutes.toString().padStart(2, '0')}
+                  onChange={(e) => {
+                    const val = e.target.value.replace(/\D/g, '');
+                    if (val === '') {
+                      setMinutes(0);
+                    } else if (val.length <= 2) {
+                      const num = parseInt(val, 10);
+                      // Allow typing intermediate values, will validate on blur
+                      if (num <= 59) {
+                        setMinutes(num);
+                      } else if (val.length === 1) {
+                        // Allow single digit that might become valid (like "6" for "60" which will be corrected)
+                        setMinutes(num);
+                      }
+                    }
+                  }}
+                  onBlur={(e) => {
+                    const val = e.target.value.replace(/\D/g, '');
+                    if (val === '') {
+                      setMinutes(0);
+                    } else {
+                      const num = parseInt(val, 10);
+                      if (num > 59) {
+                        setMinutes(59);
+                      } else {
+                        setMinutes(num);
+                      }
+                    }
+                  }}
+                  onFocus={(e) => e.target.select()}
+                  className="my-2 px-2 py-3 bg-gray-50 dark:bg-slate-800 rounded-lg w-[70px] text-center
+                           text-3xl font-bold text-gray-900 dark:text-white
+                           focus:outline-none focus:ring-2 focus:ring-blue-500
+                           hover:bg-gray-100 dark:hover:bg-slate-700 transition-colors"
+                  maxLength={2}
+                />
                 <button
                   type="button"
                   onClick={decrementMinutesByTen}

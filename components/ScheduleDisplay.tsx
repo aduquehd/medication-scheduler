@@ -3,7 +3,7 @@
 import { DoseSchedule } from '@/types/medication';
 import { formatTimeDisplay } from '@/utils/timeCalculations';
 import { useTranslation } from '@/hooks/useTranslation';
-import { Calendar, Clock, AlertCircle } from 'lucide-react';
+import { Calendar, Clock, AlertCircle, ArrowRight } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import React from 'react';
 import TimelineProgressBar from './TimelineProgressBar';
@@ -144,7 +144,13 @@ export default function ScheduleDisplay({ schedule, firstDoseTime, hoveredMedica
                 const [prevHour, prevMinute] = prevGroup.time.split(':').map(Number);
                 const prevTimeInMinutes = prevHour * 60 + prevMinute;
                 
-                if (currentTimeInMinutes >= prevTimeInMinutes && currentTimeInMinutes < groupTimeInMinutes) {
+                // Fixed: Show NOW line only when time is after previous dose but before current dose
+                if (currentTimeInMinutes > prevTimeInMinutes && currentTimeInMinutes < groupTimeInMinutes) {
+                  showTimeLine = true;
+                }
+              } else {
+                // Previous group is next day, this is first dose of today
+                if (currentTimeInMinutes < groupTimeInMinutes) {
                   showTimeLine = true;
                 }
               }
@@ -180,34 +186,112 @@ export default function ScheduleDisplay({ schedule, firstDoseTime, hoveredMedica
           
           return (
             <React.Fragment key={`${group.time}-${group.isNextDay}-${index}`}>
-              {/* Show missing hour lines before this dose */}
-              {missingHours.map((hour) => {
-                const hourTime = new Date();
-                hourTime.setHours(hour, 0, 0, 0);
-                const hourTimeInMinutes = hour * 60;
-                const shouldShowNowHere = !group.isNextDay && currentTimeInMinutes >= hourTimeInMinutes && currentTimeInMinutes < hourTimeInMinutes + 60;
-                
-                return shouldShowNowHere ? (
-                  // Show NOW line instead of missing hour if current time is in this hour
-                  <div key={`now-${hour}`} className="flex items-center space-x-2 -my-2">
-                    <div className="flex items-center space-x-2">
-                      <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse" />
-                      <span className="text-xs font-bold text-red-500 whitespace-nowrap">
-                        {t.now} - {now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
-                      </span>
-                    </div>
-                    <div className="flex-1 h-0.5 bg-gradient-to-r from-red-500 via-red-300 to-transparent" />
-                  </div>
-                ) : (
-                  <div key={`missing-${hour}`} className="flex items-center space-x-2 -my-2">
-                    <span className="text-xs text-gray-400 dark:text-gray-500 whitespace-nowrap min-w-[65px]">
-                      {hourTime.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })}
-                    </span>
-                    <div className="flex-1 h-px bg-gradient-to-r from-gray-300 via-gray-200 to-transparent dark:from-gray-600 dark:via-gray-700" />
-                  </div>
-                );
-              })}
-              {showTimeLine && (
+              {/* Show missing hour lines or condensed range before this dose */}
+              {(() => {
+                // Check if we should show a condensed range (2 or more consecutive hours)
+                if (missingHours.length >= 2) {
+                  const firstHour = missingHours[0];
+                  const lastHour = missingHours[missingHours.length - 1];
+                  const firstTime = new Date();
+                  firstTime.setHours(firstHour, 0, 0, 0);
+                  const lastTime = new Date();
+                  lastTime.setHours(lastHour + 1, 0, 0, 0);
+                  
+                  const firstHourMinutes = firstHour * 60;
+                  const lastHourMinutes = (lastHour + 1) * 60;
+                  
+                  // Check if NOW should be shown before the range
+                  const nowBeforeRange = !group.isNextDay && currentTimeInMinutes < firstHourMinutes && showTimeLine;
+                  
+                  // Check if NOW should be shown within the range
+                  const nowInRange = missingHours.some(hour => {
+                    const hourTimeInMinutes = hour * 60;
+                    return !group.isNextDay && currentTimeInMinutes >= hourTimeInMinutes && currentTimeInMinutes < hourTimeInMinutes + 60;
+                  });
+                  
+                  const elements = [];
+                  
+                  // Show NOW line before range if needed
+                  if (nowBeforeRange) {
+                    elements.push(
+                      <div key={`now-before-range`} className="flex items-center space-x-2 -my-2">
+                        <div className="flex items-center space-x-2">
+                          <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse" />
+                          <span className="text-xs font-bold text-red-500 whitespace-nowrap">
+                            {t.now} - {now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
+                          </span>
+                        </div>
+                        <div className="flex-1 h-0.5 bg-gradient-to-r from-red-500 via-red-300 to-transparent" />
+                      </div>
+                    );
+                  }
+                  
+                  if (nowInRange) {
+                    // Show NOW line within the range position
+                    elements.push(
+                      <div key={`now-in-range`} className="flex items-center space-x-2 -my-2">
+                        <div className="flex items-center space-x-2">
+                          <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse" />
+                          <span className="text-xs font-bold text-red-500 whitespace-nowrap">
+                            {t.now} - {now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
+                          </span>
+                        </div>
+                        <div className="flex-1 h-0.5 bg-gradient-to-r from-red-500 via-red-300 to-transparent" />
+                      </div>
+                    );
+                  } else {
+                    // Show condensed range
+                    elements.push(
+                      <div key={`range-${firstHour}-${lastHour}`} className="flex items-center space-x-2 -my-3 py-1">
+                        <div className="flex items-center space-x-2 text-xs text-gray-400 dark:text-gray-500">
+                          <span className="whitespace-nowrap">
+                            {firstTime.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })}
+                          </span>
+                          <ArrowRight className="w-3 h-3" />
+                          <span className="whitespace-nowrap">
+                            {lastTime.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })}
+                          </span>
+                        </div>
+                        <div className="flex-1 h-px bg-gradient-to-r from-gray-300 via-gray-200 to-transparent dark:from-gray-600 dark:via-gray-700 opacity-50" />
+                      </div>
+                    );
+                  }
+                  
+                  return elements;
+                } else if (missingHours.length === 1) {
+                  // Show individual hour line only for single missing hour
+                  return missingHours.map((hour) => {
+                    const hourTime = new Date();
+                    hourTime.setHours(hour, 0, 0, 0);
+                    const hourTimeInMinutes = hour * 60;
+                    const shouldShowNowHere = !group.isNextDay && currentTimeInMinutes >= hourTimeInMinutes && currentTimeInMinutes < hourTimeInMinutes + 60;
+                    
+                    return shouldShowNowHere ? (
+                      // Show NOW line instead of missing hour if current time is in this hour
+                      <div key={`now-${hour}`} className="flex items-center space-x-2 -my-2">
+                        <div className="flex items-center space-x-2">
+                          <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse" />
+                          <span className="text-xs font-bold text-red-500 whitespace-nowrap">
+                            {t.now} - {now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
+                          </span>
+                        </div>
+                        <div className="flex-1 h-0.5 bg-gradient-to-r from-red-500 via-red-300 to-transparent" />
+                      </div>
+                    ) : (
+                      <div key={`missing-${hour}`} className="flex items-center space-x-2 -my-2">
+                        <span className="text-xs text-gray-400 dark:text-gray-500 whitespace-nowrap min-w-[65px]">
+                          {hourTime.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })}
+                        </span>
+                        <div className="flex-1 h-px bg-gradient-to-r from-gray-300 via-gray-200 to-transparent dark:from-gray-600 dark:via-gray-700" />
+                      </div>
+                    );
+                  });
+                }
+              })()}
+              {showTimeLine && !missingHours.some(h => {
+                const hourTimeInMinutes = h * 60;
+                return currentTimeInMinutes >= hourTimeInMinutes && currentTimeInMinutes < hourTimeInMinutes + 60;
+              }) && !(missingHours.length >= 2 && currentTimeInMinutes < missingHours[0] * 60) && (
                 <div className="flex items-center space-x-2 -my-2">
                   <div className="flex items-center space-x-2">
                     <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse" />

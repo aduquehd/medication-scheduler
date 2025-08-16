@@ -56,21 +56,17 @@ export const generateSchedule = (
       } else {
         // Calculate subsequent doses based on interval
         const totalMinutes = startMinutes + (medication.interval * i * 60);
-        const isNextDay = totalMinutes >= 1440; // 24 hours = 1440 minutes
         const adjustedMinutes = totalMinutes % 1440;
         const doseTime = minutesToTime(adjustedMinutes);
         
-        // For doses that land at midnight (00:00) after the first dose, they should be next day
-        const isMidnightNextDay = adjustedMinutes === 0 && i > 0;
-        
-        // Only add if dose is within 24 hours from start time
-        if (totalMinutes < startMinutes + 1440) {
+        // Only add if dose is within 24 hours window
+        if (totalMinutes - startMinutes < 1440) {
           schedule.push({
             medicationId: medication.id,
             medicationName: medication.name,
             time: doseTime,
             doseNumber: i + 1,
-            isNextDay: isNextDay || isMidnightNextDay,
+            isNextDay: false, // All doses within 24-hour view are "today"
             color: medication.color
           });
         }
@@ -78,14 +74,11 @@ export const generateSchedule = (
     }
   });
   
-  // Sort schedule by time
+  // Sort schedule by time only (all doses are within 24-hour window)
   return schedule.sort((a, b) => {
-    // First sort by day (current day before next day)
-    if (a.isNextDay !== b.isNextDay) {
-      return a.isNextDay ? 1 : -1;
-    }
-    // Then sort by time
-    return timeToMinutes(a.time) - timeToMinutes(b.time);
+    const aMinutes = timeToMinutes(a.time);
+    const bMinutes = timeToMinutes(b.time);
+    return aMinutes - bMinutes;
   });
 };
 
