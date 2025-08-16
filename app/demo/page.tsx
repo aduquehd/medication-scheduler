@@ -1,7 +1,6 @@
 'use client';
 
 import { useEffect } from 'react';
-import { useRouter } from 'next/navigation';
 
 const DEMO_DATA = {
   "version": "1.0",
@@ -70,27 +69,38 @@ const DEMO_DATA = {
 };
 
 export default function DemoPage() {
-  const router = useRouter();
-
   useEffect(() => {
-    // Check if demo data is already loaded
-    const existingData = localStorage.getItem('medicationSchedule');
-    if (existingData) {
-      // Save existing data as backup
-      localStorage.setItem('medicationSchedule_backup', existingData);
+    // Always backup existing data if not already in demo mode
+    const isAlreadyInDemo = localStorage.getItem('demoMode') === 'true';
+    
+    if (!isAlreadyInDemo) {
+      const existingData = localStorage.getItem('medication-schedule');
+      if (existingData) {
+        // Save existing data as backup only if not already in demo
+        localStorage.setItem('medication-schedule-backup', existingData);
+      }
     }
 
-    // Load demo data
-    localStorage.setItem('medicationSchedule', JSON.stringify({
+    // Always load demo data (overwrite whatever is there)
+    const demoDataToSave = {
       medications: DEMO_DATA.medications,
       firstDoseTime: DEMO_DATA.defaultStartTime
-    }));
+    };
+    
+    console.log('Loading demo data:', demoDataToSave);
+    localStorage.setItem('medication-schedule', JSON.stringify(demoDataToSave));
 
-    // Add a demo mode flag
+    // Set demo mode flag
     localStorage.setItem('demoMode', 'true');
+    
+    // Verify it was saved
+    const saved = localStorage.getItem('medication-schedule');
+    console.log('Verified saved data:', saved);
 
     // Force a hard refresh to reload the data
-    window.location.href = '/';
+    setTimeout(() => {
+      window.location.href = '/';
+    }, 100);
   }, []);
 
   return (

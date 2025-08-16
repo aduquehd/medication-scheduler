@@ -79,13 +79,13 @@ export default function Home() {
     localStorage.removeItem('demoMode');
     
     // Restore backup data if it exists
-    const backup = localStorage.getItem('medicationSchedule_backup');
+    const backup = localStorage.getItem('medication-schedule-backup');
     if (backup) {
-      localStorage.setItem('medicationSchedule', backup);
-      localStorage.removeItem('medicationSchedule_backup');
+      localStorage.setItem('medication-schedule', backup);
+      localStorage.removeItem('medication-schedule-backup');
     } else {
       // Clear all data if no backup
-      localStorage.removeItem('medicationSchedule');
+      localStorage.removeItem('medication-schedule');
     }
     
     // Reload the page to refresh the data
