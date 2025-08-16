@@ -4,6 +4,7 @@ import { DoseSchedule } from '@/types/medication';
 import { formatTimeDisplay } from '@/utils/timeCalculations';
 import { Calendar, Clock, AlertCircle } from 'lucide-react';
 import { useEffect, useState } from 'react';
+import React from 'react';
 import TimelineProgressBar from './TimelineProgressBar';
 
 interface ScheduleDisplayProps {
@@ -120,10 +121,54 @@ export default function ScheduleDisplay({ schedule, firstDoseTime, hoveredMedica
             hoveredMedicationIds?.includes(dose.medicationId)
           );
           
+          // Check if we should show the current time indicator before this item
+          const now = new Date();
+          const currentHour = now.getHours();
+          const currentMinute = now.getMinutes();
+          const currentTimeInMinutes = currentHour * 60 + currentMinute;
+          
+          const [groupHour, groupMinute] = group.time.split(':').map(Number);
+          const groupTimeInMinutes = groupHour * 60 + groupMinute;
+          
+          let showTimeLine = false;
+          
+          if (!group.isNextDay) {
+            if (index === 0 && currentTimeInMinutes < groupTimeInMinutes) {
+              // Show line before first dose if current time is earlier
+              showTimeLine = true;
+            } else if (index > 0) {
+              const prevGroup = sortedGroups[index - 1];
+              if (!prevGroup.isNextDay) {
+                const [prevHour, prevMinute] = prevGroup.time.split(':').map(Number);
+                const prevTimeInMinutes = prevHour * 60 + prevMinute;
+                
+                if (currentTimeInMinutes >= prevTimeInMinutes && currentTimeInMinutes < groupTimeInMinutes) {
+                  showTimeLine = true;
+                }
+              }
+            }
+          }
+          
+          // Check if we should show line after the last today's dose
+          const isLastTodayDose = !group.isNextDay && 
+            (index === sortedGroups.length - 1 || sortedGroups[index + 1].isNextDay);
+          const showLineAfter = isLastTodayDose && currentTimeInMinutes >= groupTimeInMinutes;
+          
           return (
-            <div
-              key={`${group.time}-${group.isNextDay}-${index}`}
-              className={`
+            <React.Fragment key={`${group.time}-${group.isNextDay}-${index}`}>
+              {showTimeLine && (
+                <div className="flex items-center space-x-2 -my-2">
+                  <div className="flex items-center space-x-2">
+                    <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse" />
+                    <span className="text-xs font-bold text-red-500 whitespace-nowrap">
+                      NOW - {now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
+                    </span>
+                  </div>
+                  <div className="flex-1 h-0.5 bg-gradient-to-r from-red-500 via-red-300 to-transparent" />
+                </div>
+              )}
+              <div
+                className={`
                 border rounded-lg p-4 transition-all duration-200
                 ${isCurrent 
                   ? 'border-blue-400 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/30 dark:to-indigo-950/30 dark:border-blue-600 shadow-md' 
@@ -198,7 +243,19 @@ export default function ScheduleDisplay({ schedule, firstDoseTime, hoveredMedica
                   );
                 })}
               </div>
-            </div>
+              </div>
+              {showLineAfter && (
+                <div className="flex items-center space-x-2 -my-2">
+                  <div className="flex items-center space-x-2">
+                    <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse" />
+                    <span className="text-xs font-bold text-red-500 whitespace-nowrap">
+                      NOW - {now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
+                    </span>
+                  </div>
+                  <div className="flex-1 h-0.5 bg-gradient-to-r from-red-500 via-red-300 to-transparent" />
+                </div>
+              )}
+            </React.Fragment>
           );
         })}
       </div>
