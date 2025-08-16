@@ -2,6 +2,8 @@
 
 import { useState, FormEvent, useEffect } from 'react';
 import { X, Save, Clock, Hash, Trash2, Timer, RefreshCw, Pill } from 'lucide-react';
+import { useTranslation } from '@/hooks/useTranslation';
+import { getIntervalText } from '@/utils/translationHelpers';
 import toast from 'react-hot-toast';
 import TimeInput from './TimeInput';
 import { Medication } from '@/types/medication';
@@ -23,6 +25,7 @@ const COMMON_INTERVALS = [
 ];
 
 export default function EditMedicationModal({ medication, isOpen, onClose, onUpdate, onDelete }: EditMedicationModalProps) {
+  const { t } = useTranslation();
   const [name, setName] = useState('');
   const [interval, setInterval] = useState('');
   const [customInterval, setCustomInterval] = useState(false);
@@ -57,31 +60,31 @@ export default function EditMedicationModal({ medication, isOpen, onClose, onUpd
     e.preventDefault();
 
     if (!name.trim()) {
-      toast.error('Please enter a medication name');
+      toast.error(t.enterMedicationName);
       return;
     }
 
     const intervalValue = parseFloat(interval);
     if (!intervalValue || intervalValue <= 0 || intervalValue > 48) {
-      toast.error('Please enter a valid interval between 0 and 48 hours');
+      toast.error(t.enterValidInterval);
       return;
     }
 
     const maxDoses = useMaxDoses && maxDosesPerDay ? parseInt(maxDosesPerDay) : undefined;
     if (useMaxDoses && (!maxDoses || maxDoses < 1 || maxDoses > 10)) {
-      toast.error('Please enter a valid max doses between 1 and 10');
+      toast.error(t.enterValidMaxDoses);
       return;
     }
 
     onUpdate(medication.id, name.trim(), intervalValue, startTime, maxDoses);
-    toast.success(`Updated ${name.trim()}`);
+    toast.success(`${t.medicationUpdated} ${name.trim()}`);
     onClose();
   };
 
   const handleDelete = () => {
     if (medication && onDelete) {
       onDelete(medication.id);
-      toast.success(`Removed ${medication.name} from schedule`);
+      toast.success(`${t.medicationRemoved} ${medication.name} ${t.fromSchedule}`);
       setShowDeleteConfirm(false);
       onClose();
     }
@@ -98,7 +101,7 @@ export default function EditMedicationModal({ medication, isOpen, onClose, onUpd
       >
         <div className="flex items-center justify-between p-6 border-b border-slate-200 dark:border-slate-700">
           <h2 className="text-xl font-semibold text-gray-800 dark:text-white">
-            Edit Medication
+            {t.editMedication}
           </h2>
           <button
             onClick={onClose}
@@ -115,14 +118,14 @@ export default function EditMedicationModal({ medication, isOpen, onClose, onUpd
               htmlFor="edit-medication-name" 
               className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
             >
-              Medication Name
+              {t.medicationName}
             </label>
             <input
               id="edit-medication-name"
               type="text"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              placeholder="e.g., Aspirin, Ibuprofen"
+              placeholder={t.medicationNamePlaceholder}
               className="w-full px-4 py-2 border border-slate-200 dark:border-slate-700 rounded-lg 
                        focus:ring-2 focus:ring-blue-500 focus:border-transparent
                        bg-white dark:bg-slate-800 text-slate-900 dark:text-white
@@ -136,7 +139,7 @@ export default function EditMedicationModal({ medication, isOpen, onClose, onUpd
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                 <Clock className="inline w-4 h-4 mr-1" />
-                Start Time
+                {t.startTime}
               </label>
               <TimeInput
                 value={startTime}
@@ -144,14 +147,14 @@ export default function EditMedicationModal({ medication, isOpen, onClose, onUpd
                 label=""
               />
               <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                When to take the first dose
+                {t.whenToTakeFirstDose}
               </p>
             </div>
 
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                 <Pill className="inline w-4 h-4 mr-1" />
-                Max Doses Per Day
+                {t.maxDosesPerDay}
               </label>
               <div className="space-y-2">
                 <div className="flex items-center space-x-2">
@@ -163,7 +166,7 @@ export default function EditMedicationModal({ medication, isOpen, onClose, onUpd
                     className="rounded border-gray-300 text-blue-500 focus:ring-blue-500"
                   />
                   <label htmlFor="edit-use-max-doses" className="text-sm text-gray-600 dark:text-gray-400">
-                    Limit daily doses
+                    {t.limitDailyDoses}
                   </label>
                 </div>
                 {useMaxDoses && (
@@ -188,7 +191,7 @@ export default function EditMedicationModal({ medication, isOpen, onClose, onUpd
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
               <Timer className="inline w-4 h-4 mr-1" />
-              Dosing Interval
+              {t.dosingInterval}
             </label>
             
             <div className="grid grid-cols-2 gap-2">
@@ -208,7 +211,7 @@ export default function EditMedicationModal({ medication, isOpen, onClose, onUpd
                     }
                   `}
                 >
-                  {option.label}
+                  {getIntervalText(option.value, t)}
                 </button>
               ))}
               
@@ -229,14 +232,14 @@ export default function EditMedicationModal({ medication, isOpen, onClose, onUpd
                   }
                 `}
               >
-                {customInterval && interval ? `Every ${interval}h` : 'Custom'}
+                {customInterval && interval ? `${t.every} ${interval}${t.hours === 'hours' ? 'h' : ''}` : t.custom}
               </button>
             </div>
             
             {/* Custom interval input */}
             {customInterval && (
               <div className="mt-2 flex items-center space-x-2 p-3 bg-indigo-50 dark:bg-indigo-950/30 rounded-lg border-2 border-indigo-500">
-                <span className="text-sm text-gray-600 dark:text-gray-400">Every</span>
+                <span className="text-sm text-gray-600 dark:text-gray-400">{t.every}</span>
                 <input
                   type="number"
                   value={interval}
@@ -252,7 +255,7 @@ export default function EditMedicationModal({ medication, isOpen, onClose, onUpd
                   aria-label="Interval hours"
                   autoFocus
                 />
-                <span className="text-sm text-gray-600 dark:text-gray-400">hours</span>
+                <span className="text-sm text-gray-600 dark:text-gray-400">{t.hours}</span>
               </div>
             )}
           </div>
@@ -268,7 +271,7 @@ export default function EditMedicationModal({ medication, isOpen, onClose, onUpd
                          transition-all duration-200 hover:shadow-md"
               >
                 <Trash2 className="w-5 h-5" />
-                <span>Delete</span>
+                <span>{t.delete}</span>
               </button>
             )}
             
@@ -284,7 +287,7 @@ export default function EditMedicationModal({ medication, isOpen, onClose, onUpd
                        transform hover:scale-[1.02]"
             >
               <Save className="w-5 h-5" />
-              <span>Save Changes</span>
+              <span>{t.saveChanges}</span>
             </button>
           </div>
         </form>
@@ -307,10 +310,10 @@ export default function EditMedicationModal({ medication, isOpen, onClose, onUpd
                 </div>
               </div>
               <h3 className="text-xl font-semibold text-center text-gray-800 dark:text-white mb-2">
-                Delete Medication?
+                {t.deleteMedication}
               </h3>
               <p className="text-center text-gray-600 dark:text-gray-400 mb-6">
-                Are you sure you want to delete <span className="font-semibold">{medication?.name}</span>? This action cannot be undone.
+                {t.deleteConfirmation} <span className="font-semibold">{medication?.name}</span>? {t.cannotBeUndone}
               </p>
               <div className="flex gap-3">
                 <button
@@ -319,7 +322,7 @@ export default function EditMedicationModal({ medication, isOpen, onClose, onUpd
                            text-slate-700 dark:text-slate-300 font-medium rounded-lg
                            transition-all duration-200"
                 >
-                  Cancel
+                  {t.cancel}
                 </button>
                 <button
                   onClick={handleDelete}
@@ -327,7 +330,7 @@ export default function EditMedicationModal({ medication, isOpen, onClose, onUpd
                            text-white font-medium rounded-lg shadow-md hover:shadow-lg
                            transition-all duration-200"
                 >
-                  Delete
+                  {t.delete}
                 </button>
               </div>
             </div>

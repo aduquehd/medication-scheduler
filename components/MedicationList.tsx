@@ -4,6 +4,8 @@ import { useState } from 'react';
 import { Medication } from '@/types/medication';
 import { Pill, Calendar, RefreshCw, RotateCw, Edit2, ChevronDown, ChevronUp } from 'lucide-react';
 import { formatTimeDisplay } from '@/utils/timeCalculations';
+import { useTranslation } from '@/hooks/useTranslation';
+import { getIntervalText } from '@/utils/translationHelpers';
 import toast from 'react-hot-toast';
 import EditMedicationModal from './EditMedicationModal';
 
@@ -16,6 +18,7 @@ interface MedicationListProps {
 }
 
 export default function MedicationList({ medications, onRemove, onUpdate, onHover, onClearAll }: MedicationListProps) {
+  const { t } = useTranslation();
   const [editingMedication, setEditingMedication] = useState<Medication | null>(null);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [selectedMedicationIds, setSelectedMedicationIds] = useState<Set<string>>(new Set());
@@ -62,7 +65,7 @@ export default function MedicationList({ medications, onRemove, onUpdate, onHove
       <div className="bg-white dark:bg-slate-900 rounded-xl shadow-lg hover:shadow-xl p-6 sm:p-8 text-center transition-all duration-200 border border-slate-100 dark:border-slate-800">
         <Pill className="w-10 h-10 sm:w-12 sm:h-12 text-gray-400 mx-auto mb-3" />
         <p className="text-sm sm:text-base text-gray-500 dark:text-gray-400">
-          No medications added yet. Add your first medication to get started!
+          {t.noMedicationsYet}
         </p>
       </div>
     );
@@ -77,7 +80,7 @@ export default function MedicationList({ medications, onRemove, onUpdate, onHove
           className="lg:pointer-events-none flex items-center space-x-2 group"
         >
           <h2 className="text-lg sm:text-xl font-semibold text-gray-800 dark:text-white">
-            Your Medications
+            {t.yourMedications}
           </h2>
           {medications.length > 0 && (
             <span className="text-sm text-gray-500 dark:text-gray-400">({medications.length})</span>
@@ -100,7 +103,7 @@ export default function MedicationList({ medications, onRemove, onUpdate, onHove
             aria-label="Clear all medications"
           >
             <RefreshCw className="w-4 h-4 text-red-600 dark:text-red-400 group-hover:rotate-180 transition-transform duration-300" />
-            <span className="text-sm font-medium text-red-700 dark:text-red-300">Clear All</span>
+            <span className="text-sm font-medium text-red-700 dark:text-red-300">{t.clearAll}</span>
           </button>
         )}
       </div>
@@ -174,7 +177,7 @@ export default function MedicationList({ medications, onRemove, onUpdate, onHove
                 <div className="flex flex-wrap gap-x-3 gap-y-1 text-xs text-gray-600 dark:text-gray-400 sm:hidden">
                   <span className="flex items-center">
                     <RotateCw className="w-3 h-3 mr-1" />
-                    Every {medication.interval}h
+                    {getIntervalText(medication.interval, t)}
                   </span>
                   {medication.startTime && (
                     <span className="flex items-center">
@@ -184,7 +187,7 @@ export default function MedicationList({ medications, onRemove, onUpdate, onHove
                   )}
                   <span className="flex items-center">
                     <Pill className="w-3 h-3 mr-1" />
-                    {medication.maxDosesPerDay || Math.ceil(24 / medication.interval)}/day
+                    {medication.maxDosesPerDay || Math.ceil(24 / medication.interval)}{t.perDay}
                   </span>
                 </div>
                 
@@ -194,12 +197,12 @@ export default function MedicationList({ medications, onRemove, onUpdate, onHove
                   <div className="space-y-1">
                     <div className="flex items-center">
                       <RotateCw className="w-4 h-4 mr-1.5 text-gray-400 dark:text-gray-500" />
-                      <span>Every {medication.interval}h</span>
+                      <span>{getIntervalText(medication.interval, t)}</span>
                     </div>
                     <div className="flex items-center">
                       <Pill className="w-4 h-4 mr-1.5 text-gray-400 dark:text-gray-500" />
                       <span>
-                        {medication.maxDosesPerDay || Math.ceil(24 / medication.interval)}/day
+                        {medication.maxDosesPerDay || Math.ceil(24 / medication.interval)}{t.perDay}
                       </span>
                     </div>
                   </div>
@@ -208,7 +211,7 @@ export default function MedicationList({ medications, onRemove, onUpdate, onHove
                   <div>
                     {medication.startTime && (
                       <div className="space-y-1">
-                        <div className="text-xs text-gray-500 dark:text-gray-500">Starts at</div>
+                        <div className="text-xs text-gray-500 dark:text-gray-500">{t.startsAt}</div>
                         <div className="flex items-center">
                           <Calendar className="w-4 h-4 mr-1.5 text-gray-400 dark:text-gray-500" />
                           <span>{formatTimeDisplay(medication.startTime)}</span>
@@ -226,7 +229,7 @@ export default function MedicationList({ medications, onRemove, onUpdate, onHove
         {/* Footer */}
         <div className="mt-3 sm:mt-4 pt-3 sm:pt-4 border-t border-slate-200 dark:border-slate-700">
           <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400">
-            Total medications: {medications.length}
+            {t.totalMedications}: {medications.length}
           </p>
         </div>
       </div>

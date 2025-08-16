@@ -4,6 +4,8 @@ import { useState, FormEvent, useEffect } from 'react';
 import { X, Save, Plus, Clock, Hash, Timer, RefreshCw } from 'lucide-react';
 import toast from 'react-hot-toast';
 import TimeInput from './TimeInput';
+import { useTranslation } from '@/hooks/useTranslation';
+import { getIntervalText } from '@/utils/translationHelpers';
 
 interface AddMedicationModalProps {
   isOpen: boolean;
@@ -14,11 +16,11 @@ interface AddMedicationModalProps {
 }
 
 const COMMON_INTERVALS = [
-  { label: 'Every 4 hours', value: 4 },
-  { label: 'Every 6 hours', value: 6 },
-  { label: 'Every 8 hours', value: 8 },
-  { label: 'Every 12 hours', value: 12 },
-  { label: 'Once daily', value: 24 },
+  { value: 4 },
+  { value: 6 },
+  { value: 8 },
+  { value: 12 },
+  { value: 24 },
 ];
 
 export default function AddMedicationModal({ 
@@ -28,6 +30,7 @@ export default function AddMedicationModal({
   defaultStartTime,
   onUpdateDefaultTime 
 }: AddMedicationModalProps) {
+  const { t } = useTranslation();
   const [name, setName] = useState('');
   const [interval, setInterval] = useState('');
   const [customInterval, setCustomInterval] = useState(false);
@@ -55,24 +58,24 @@ export default function AddMedicationModal({
     e.preventDefault();
 
     if (!name.trim()) {
-      toast.error('Please enter a medication name');
+      toast.error(t.enterMedicationName);
       return;
     }
 
     const intervalValue = parseFloat(interval);
     if (!intervalValue || intervalValue <= 0 || intervalValue > 48) {
-      toast.error('Please enter a valid interval between 0 and 48 hours');
+      toast.error(t.enterValidInterval);
       return;
     }
 
     const maxDoses = useMaxDoses && maxDosesPerDay ? parseInt(maxDosesPerDay) : undefined;
     if (useMaxDoses && (!maxDoses || maxDoses < 1 || maxDoses > 10)) {
-      toast.error('Please enter a valid max doses between 1 and 10');
+      toast.error(t.enterValidMaxDoses);
       return;
     }
 
     onAdd(name.trim(), intervalValue, startTime, maxDoses);
-    toast.success(`Added ${name.trim()} to schedule`);
+    toast.success(`${t.medicationAdded} ${name.trim()} ${t.toSchedule}`);
     resetForm();
     onClose();
   };
@@ -93,7 +96,7 @@ export default function AddMedicationModal({
       >
         <div className="flex items-center justify-between p-6 border-b border-slate-200 dark:border-slate-700">
           <h2 className="text-xl font-semibold text-gray-800 dark:text-white">
-            Add Medication
+            {t.addMedication}
           </h2>
           <button
             onClick={handleCancel}
@@ -112,14 +115,14 @@ export default function AddMedicationModal({
                 htmlFor="add-medication-name" 
                 className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
               >
-                Medication Name
+                {t.medicationName}
               </label>
               <input
                 id="add-medication-name"
                 type="text"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                placeholder="e.g., Aspirin, Ibuprofen"
+                placeholder={t.medicationNamePlaceholder}
                 className="w-full px-4 py-2 border border-slate-200 dark:border-slate-700 rounded-lg 
                          focus:ring-2 focus:ring-blue-500 focus:border-transparent
                          bg-white dark:bg-slate-800 text-slate-900 dark:text-white
@@ -135,7 +138,7 @@ export default function AddMedicationModal({
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   <Clock className="inline w-4 h-4 mr-1" />
-                  Start Time
+                  {t.startTime}
                 </label>
                 <TimeInput
                   value={startTime}
@@ -143,7 +146,7 @@ export default function AddMedicationModal({
                   label=""
                 />
                 <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                  When to take the first dose
+                  {t.whenToTakeFirstDose}
                 </p>
               </div>
 
@@ -151,7 +154,7 @@ export default function AddMedicationModal({
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   <Hash className="inline w-4 h-4 mr-1" />
-                  Max Doses Per Day
+                  {t.maxDosesPerDay}
                 </label>
                 <div className="space-y-2">
                   <div className="flex items-center space-x-2">
@@ -163,7 +166,7 @@ export default function AddMedicationModal({
                       className="rounded border-gray-300 text-blue-500 focus:ring-blue-500"
                     />
                     <label htmlFor="add-use-max-doses" className="text-sm text-gray-600 dark:text-gray-400">
-                      Limit daily doses
+                      {t.limitDailyDoses}
                     </label>
                   </div>
                   {useMaxDoses && (
@@ -189,7 +192,7 @@ export default function AddMedicationModal({
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                 <Timer className="inline w-4 h-4 mr-1" />
-                Dosing Interval
+                {t.dosingInterval}
               </label>
               
               <div className="grid grid-cols-2 gap-2">
@@ -209,7 +212,7 @@ export default function AddMedicationModal({
                       }
                     `}
                   >
-                    {option.label}
+                    {getIntervalText(option.value, t)}
                   </button>
                 ))}
                 
@@ -230,14 +233,14 @@ export default function AddMedicationModal({
                     }
                   `}
                 >
-                  {customInterval && interval ? `Every ${interval}h` : 'Custom'}
+                  {customInterval && interval ? `${t.every} ${interval}h` : t.custom}
                 </button>
               </div>
               
               {/* Custom interval input */}
               {customInterval && (
                 <div className="mt-2 flex items-center space-x-2 p-3 bg-blue-50 dark:bg-blue-950/30 rounded-lg border-2 border-blue-500">
-                  <span className="text-sm text-gray-600 dark:text-gray-400">Every</span>
+                  <span className="text-sm text-gray-600 dark:text-gray-400">{t.every}</span>
                   <input
                     type="number"
                     value={interval}
@@ -253,7 +256,7 @@ export default function AddMedicationModal({
                     aria-label="Interval hours"
                     autoFocus
                   />
-                  <span className="text-sm text-gray-600 dark:text-gray-400">hours</span>
+                  <span className="text-sm text-gray-600 dark:text-gray-400">{t.hours}</span>
                 </div>
               )}
             </div>
@@ -272,7 +275,7 @@ export default function AddMedicationModal({
                        transform hover:scale-[1.02]"
             >
               <Save className="w-5 h-5" />
-              <span>Save Medication</span>
+              <span>{t.saveMedication}</span>
             </button>
           </div>
         </form>

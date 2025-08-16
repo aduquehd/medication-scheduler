@@ -2,6 +2,7 @@
 
 import { DoseSchedule } from '@/types/medication';
 import { formatTimeDisplay } from '@/utils/timeCalculations';
+import { useTranslation } from '@/hooks/useTranslation';
 import { Calendar, Clock, AlertCircle } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import React from 'react';
@@ -14,6 +15,7 @@ interface ScheduleDisplayProps {
 }
 
 export default function ScheduleDisplay({ schedule, firstDoseTime, hoveredMedicationIds }: ScheduleDisplayProps) {
+  const { t } = useTranslation();
   const [currentTime, setCurrentTime] = useState(new Date());
 
   useEffect(() => {
@@ -29,7 +31,7 @@ export default function ScheduleDisplay({ schedule, firstDoseTime, hoveredMedica
       <div className="bg-white dark:bg-slate-900 rounded-xl shadow-lg hover:shadow-xl p-8 text-center transition-all duration-200 border border-slate-100 dark:border-slate-800">
         <Calendar className="w-12 h-12 text-gray-400 mx-auto mb-3" />
         <p className="text-gray-500 dark:text-gray-400">
-          Your medication schedule will appear here once you add medications.
+          {t.scheduleWillAppear}
         </p>
       </div>
     );
@@ -73,7 +75,7 @@ export default function ScheduleDisplay({ schedule, firstDoseTime, hoveredMedica
     <div className="bg-white dark:bg-slate-900 rounded-xl shadow-lg hover:shadow-xl p-6 transition-all duration-200 border border-slate-100 dark:border-slate-800">
       <div className="mb-4">
         <h2 className="text-xl font-semibold text-gray-800 dark:text-white">
-          24-Hour Schedule
+          {t.twentyFourHourSchedule}
         </h2>
       </div>
 
@@ -110,7 +112,7 @@ export default function ScheduleDisplay({ schedule, firstDoseTime, hoveredMedica
       <div className="mb-4 p-3 bg-slate-50 dark:bg-slate-800/50 rounded-lg border border-slate-200 dark:border-slate-700">
         <div className="flex items-center space-x-2 text-sm text-gray-600 dark:text-gray-400">
           <AlertCircle className="w-4 h-4" />
-          <span>First dose starts at {formatTimeDisplay(firstDoseTime)}</span>
+          <span>{t.firstDoseStartsAt} {formatTimeDisplay(firstDoseTime)}</span>
         </div>
       </div>
 
@@ -191,7 +193,7 @@ export default function ScheduleDisplay({ schedule, firstDoseTime, hoveredMedica
                     <div className="flex items-center space-x-2">
                       <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse" />
                       <span className="text-xs font-bold text-red-500 whitespace-nowrap">
-                        NOW - {now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
+                        {t.now} - {now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
                       </span>
                     </div>
                     <div className="flex-1 h-0.5 bg-gradient-to-r from-red-500 via-red-300 to-transparent" />
@@ -210,7 +212,7 @@ export default function ScheduleDisplay({ schedule, firstDoseTime, hoveredMedica
                   <div className="flex items-center space-x-2">
                     <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse" />
                     <span className="text-xs font-bold text-red-500 whitespace-nowrap">
-                      NOW - {now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
+                      {t.now} - {now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
                     </span>
                   </div>
                   <div className="flex-1 h-0.5 bg-gradient-to-r from-red-500 via-red-300 to-transparent" />
@@ -240,12 +242,12 @@ export default function ScheduleDisplay({ schedule, firstDoseTime, hoveredMedica
                   </span>
                   {group.isNextDay && (
                     <span className="text-xs bg-amber-100 dark:bg-amber-900/50 text-amber-700 dark:text-amber-300 px-1.5 py-0.5 rounded-full font-medium">
-                      Next Day
+                      {t.nextDay}
                     </span>
                   )}
                   {isCurrent && (
                     <span className="text-xs bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300 px-1.5 py-0.5 rounded-full font-medium animate-pulse">
-                      Current
+                      {t.current}
                     </span>
                   )}
                 </div>
@@ -298,7 +300,7 @@ export default function ScheduleDisplay({ schedule, firstDoseTime, hoveredMedica
                   <div className="flex items-center space-x-2">
                     <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse" />
                     <span className="text-xs font-bold text-red-500 whitespace-nowrap">
-                      NOW - {now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
+                      {t.now} - {now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
                     </span>
                   </div>
                   <div className="flex-1 h-0.5 bg-gradient-to-r from-red-500 via-red-300 to-transparent" />
@@ -325,7 +327,7 @@ export default function ScheduleDisplay({ schedule, firstDoseTime, hoveredMedica
                       <div className="flex items-center space-x-2">
                         <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse" />
                         <span className="text-xs font-bold text-red-500 whitespace-nowrap">
-                          NOW - {now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
+                          {t.now} - {now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
                         </span>
                       </div>
                       <div className="flex-1 h-0.5 bg-gradient-to-r from-red-500 via-red-300 to-transparent" />
@@ -347,8 +349,8 @@ export default function ScheduleDisplay({ schedule, firstDoseTime, hoveredMedica
 
       <div className="mt-6 pt-4 border-t border-gray-200 dark:border-gray-700">
         <div className="flex items-center justify-between text-sm text-gray-500 dark:text-gray-400">
-          <span>Total doses today: {schedule.filter(d => !d.isNextDay).length}</span>
-          <span>Next day doses: {schedule.filter(d => d.isNextDay).length}</span>
+          <span>{t.totalDosesToday}: {schedule.filter(d => !d.isNextDay).length}</span>
+          <span>{t.nextDayDoses}: {schedule.filter(d => d.isNextDay).length}</span>
         </div>
       </div>
     </div>

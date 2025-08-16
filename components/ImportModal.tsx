@@ -3,6 +3,7 @@
 import { useState, useRef } from 'react';
 import { X, Upload, FileText, Clipboard, AlertCircle, FileJson, FlaskConical, ClipboardPaste } from 'lucide-react';
 import { validateImportData, handleFileSelect } from '@/utils/importExport';
+import { useTranslation } from '@/hooks/useTranslation';
 import { Medication } from '@/types/medication';
 import toast from 'react-hot-toast';
 
@@ -13,6 +14,7 @@ interface ImportModalProps {
 }
 
 export default function ImportModal({ isOpen, onClose, onImport }: ImportModalProps) {
+  const { t } = useTranslation();
   const [activeTab, setActiveTab] = useState<'file' | 'paste'>('paste');
   const [pastedJson, setPastedJson] = useState('');
   const [error, setError] = useState<string | null>(null);
@@ -28,7 +30,7 @@ export default function ImportModal({ isOpen, onClose, onImport }: ImportModalPr
         file,
         (importedMeds, importedStartTime) => {
           onImport(importedMeds, importedStartTime);
-          toast.success(`Imported ${importedMeds.length} medication${importedMeds.length !== 1 ? 's' : ''}`);
+          toast.success(`${t.imported} ${importedMeds.length} ${importedMeds.length !== 1 ? t.medications : t.medication}`);
           onClose();
         },
         (errorMsg) => {
@@ -47,7 +49,7 @@ export default function ImportModal({ isOpen, onClose, onImport }: ImportModalPr
     setError(null);
     
     if (!pastedJson.trim()) {
-      setError('Please paste JSON data');
+      setError(t.pleasePasteJSON);
       return;
     }
 
@@ -56,18 +58,18 @@ export default function ImportModal({ isOpen, onClose, onImport }: ImportModalPr
       const validationResult = validateImportData(data);
       
       if (!validationResult.isValid) {
-        setError(validationResult.error || 'Invalid data format');
-        toast.error(validationResult.error || 'Invalid data format');
+        setError(validationResult.error || t.invalidDataFormat);
+        toast.error(validationResult.error || t.invalidDataFormat);
         return;
       }
 
       onImport(validationResult.medications!, validationResult.defaultStartTime!);
-      toast.success(`Imported ${validationResult.medications!.length} medication${validationResult.medications!.length !== 1 ? 's' : ''}`);
+      toast.success(`${t.imported} ${validationResult.medications!.length} ${validationResult.medications!.length !== 1 ? t.medications : t.medication}`);
       setPastedJson('');
       onClose();
     } catch (err) {
-      setError('Invalid JSON format. Please check your data.');
-      toast.error('Invalid JSON format');
+      setError(t.invalidJSONFormat);
+      toast.error(t.invalidJSONFormat);
     }
   };
 
@@ -101,7 +103,7 @@ export default function ImportModal({ isOpen, onClose, onImport }: ImportModalPr
       >
         <div className="flex items-center justify-between p-6 border-b border-slate-200 dark:border-slate-700">
           <h2 className="text-xl font-semibold text-gray-800 dark:text-white">
-            Import Schedule
+            {t.importSchedule}
           </h2>
           <button
             onClick={onClose}
@@ -123,7 +125,7 @@ export default function ImportModal({ isOpen, onClose, onImport }: ImportModalPr
             }`}
           >
             <Clipboard className="w-5 h-5" />
-            <span>Paste JSON</span>
+            <span>{t.pasteJSON}</span>
           </button>
           <button
             onClick={() => setActiveTab('file')}
@@ -134,7 +136,7 @@ export default function ImportModal({ isOpen, onClose, onImport }: ImportModalPr
             }`}
           >
             <FileText className="w-5 h-5" />
-            <span>Upload File</span>
+            <span>{t.uploadFile}</span>
           </button>
         </div>
 
@@ -143,7 +145,7 @@ export default function ImportModal({ isOpen, onClose, onImport }: ImportModalPr
             <div className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  Paste your JSON data here
+                  {t.pasteYourJSON}
                 </label>
                 <textarea
                   value={pastedJson}
@@ -168,9 +170,9 @@ export default function ImportModal({ isOpen, onClose, onImport }: ImportModalPr
                       try {
                         const text = await navigator.clipboard.readText();
                         setPastedJson(text);
-                        toast.success('Pasted from clipboard');
+                        toast.success(t.pastedFromClipboard);
                       } catch (err) {
-                        toast.error('Failed to read clipboard');
+                        toast.error(t.failedToReadClipboard);
                       }
                     }}
                     className="flex-1 flex items-center justify-center space-x-2 px-4 py-2 
@@ -179,7 +181,7 @@ export default function ImportModal({ isOpen, onClose, onImport }: ImportModalPr
                              transition-all duration-200"
                   >
                     <ClipboardPaste className="w-4 h-4" />
-                    <span>Paste</span>
+                    <span>{t.paste}</span>
                   </button>
                   <button
                     onClick={handlePaste}
@@ -191,7 +193,7 @@ export default function ImportModal({ isOpen, onClose, onImport }: ImportModalPr
                              transition-all duration-200 disabled:cursor-not-allowed"
                   >
                     <FileJson className="w-4 h-4" />
-                    <span>Import Data</span>
+                    <span>{t.importData}</span>
                   </button>
                 </div>
                 
@@ -205,7 +207,7 @@ export default function ImportModal({ isOpen, onClose, onImport }: ImportModalPr
                            font-medium rounded-lg transition-all duration-200"
                 >
                   <FlaskConical className="w-4 h-4" />
-                  <span>Load Sample Data</span>
+                  <span>{t.loadSampleData}</span>
                 </button>
               </div>
             </div>
@@ -214,7 +216,7 @@ export default function ImportModal({ isOpen, onClose, onImport }: ImportModalPr
               <div className="border-2 border-dashed border-slate-300 dark:border-slate-600 rounded-lg p-8 text-center">
                 <Upload className="w-12 h-12 text-gray-400 mx-auto mb-4" />
                 <p className="text-gray-600 dark:text-gray-400 mb-4">
-                  Drop your JSON file here or click to browse
+                  {t.dropFileHere}
                 </p>
                 <input
                   ref={fileInputRef}
@@ -229,10 +231,10 @@ export default function ImportModal({ isOpen, onClose, onImport }: ImportModalPr
                            text-white font-medium rounded-lg shadow-md hover:shadow-lg transition-all duration-200"
                 >
                   <FileText className="w-4 h-4" />
-                  <span>Choose File</span>
+                  <span>{t.chooseFile}</span>
                 </button>
                 <p className="text-xs text-gray-500 dark:text-gray-400 mt-4">
-                  Accepts .json files exported from Medication Scheduler
+                  {t.acceptsJSON}
                 </p>
               </div>
             </div>
@@ -249,11 +251,10 @@ export default function ImportModal({ isOpen, onClose, onImport }: ImportModalPr
 
           <div className="mt-6 p-4 bg-slate-50 dark:bg-slate-800/50 rounded-lg">
             <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              Import Format
+              {t.importFormat}
             </h3>
             <p className="text-xs text-gray-600 dark:text-gray-400">
-              The JSON file should contain your medications with their schedules. 
-              You can export your current schedule to see the expected format, or use the sample data as a reference.
+              {t.importFormatDescription}
             </p>
           </div>
         </div>

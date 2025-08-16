@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { Copy, Check, X, Share2, Download } from 'lucide-react';
+import { useTranslation } from '@/hooks/useTranslation';
 import toast from 'react-hot-toast';
 import { Medication } from '@/types/medication';
 import { ScheduleExport } from '@/utils/importExport';
@@ -14,6 +15,7 @@ interface ShareModalProps {
 }
 
 export default function ShareModal({ isOpen, onClose, medications, defaultStartTime }: ShareModalProps) {
+  const { t } = useTranslation();
   const [copied, setCopied] = useState(false);
   const [canShare, setCanShare] = useState(false);
 
@@ -36,10 +38,10 @@ export default function ShareModal({ isOpen, onClose, medications, defaultStartT
     try {
       await navigator.clipboard.writeText(jsonString);
       setCopied(true);
-      toast.success('Copied to clipboard!');
+      toast.success(t.copiedToClipboard);
       setTimeout(() => setCopied(false), 2000);
     } catch (error) {
-      toast.error('Failed to copy to clipboard');
+      toast.error(t.failedToReadClipboard);
     }
   };
 
@@ -53,7 +55,7 @@ export default function ShareModal({ isOpen, onClose, medications, defaultStartT
     a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
-    toast.success('Schedule downloaded!');
+    toast.success(t.exportedSuccessfully);
   };
 
   const handleShare = async () => {
@@ -89,7 +91,7 @@ export default function ShareModal({ isOpen, onClose, medications, defaultStartT
         <div className="flex items-center justify-between p-6 border-b border-slate-200 dark:border-slate-700">
           <h2 className="text-xl font-semibold text-gray-800 dark:text-white flex items-center space-x-2">
             <Download className="w-5 h-5" />
-            <span>Export Schedule</span>
+            <span>{t.exportSchedule}</span>
           </h2>
           <button
             onClick={onClose}
@@ -103,7 +105,7 @@ export default function ShareModal({ isOpen, onClose, medications, defaultStartT
         <div className="p-6 space-y-4">
           <div>
             <p className="text-sm text-gray-600 dark:text-gray-400 mb-3">
-              Export your medication schedule as JSON data. You can copy it to clipboard or download as a file.
+              {t.exportDescription}
             </p>
             
             <div className="bg-slate-50 dark:bg-slate-800/50 rounded-lg p-4 relative border border-slate-200 dark:border-slate-700">
@@ -121,12 +123,12 @@ export default function ShareModal({ isOpen, onClose, medications, defaultStartT
               {copied ? (
                 <>
                   <Check className="w-4 h-4" />
-                  <span>Copied!</span>
+                  <span>{t.copiedToClipboard}</span>
                 </>
               ) : (
                 <>
                   <Copy className="w-4 h-4" />
-                  <span>Copy</span>
+                  <span>{t.copyToClipboard}</span>
                 </>
               )}
             </button>
@@ -136,7 +138,7 @@ export default function ShareModal({ isOpen, onClose, medications, defaultStartT
               className="flex items-center justify-center space-x-2 px-6 py-2 bg-gradient-to-r from-violet-600 to-violet-500 hover:from-violet-700 hover:to-violet-600 text-white rounded-lg shadow-md hover:shadow-lg transition-all"
             >
               <Download className="w-4 h-4" />
-              <span>Download</span>
+              <span>{t.downloadJSON}</span>
             </button>
           </div>
 
