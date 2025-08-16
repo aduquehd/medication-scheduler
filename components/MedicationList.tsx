@@ -71,9 +71,10 @@ export default function MedicationList({ medications, onRemove, onUpdate, onHove
   return (
     <div className="bg-white dark:bg-slate-900 rounded-xl shadow-lg hover:shadow-xl p-4 sm:p-6 transition-all duration-200 border border-slate-100 dark:border-slate-800">
       <div className="flex items-center justify-between mb-3 sm:mb-4">
+        {/* Mobile: Clickable header, Desktop: Static header */}
         <button
           onClick={() => setIsExpanded(!isExpanded)}
-          className="lg:cursor-default flex items-center space-x-2 group"
+          className="lg:pointer-events-none flex items-center space-x-2 group"
         >
           <h2 className="text-lg sm:text-xl font-semibold text-gray-800 dark:text-white">
             Your Medications
@@ -89,12 +90,13 @@ export default function MedicationList({ medications, onRemove, onUpdate, onHove
             )}
           </div>
         </button>
-        {medications.length > 0 && onClearAll && isExpanded && (
+        {medications.length > 0 && onClearAll && (
           <button
             onClick={onClearAll}
-            className="flex items-center space-x-2 px-3 py-1.5 rounded-lg
+            className={`flex items-center space-x-2 px-3 py-1.5 rounded-lg
                      bg-red-50 dark:bg-red-950/50 hover:bg-red-100 dark:hover:bg-red-900/50
-                     transition-all hover:shadow-md group"
+                     transition-all hover:shadow-md group
+                     ${!isExpanded ? 'lg:block' : ''}`}
             aria-label="Clear all medications"
           >
             <RefreshCw className="w-4 h-4 text-red-600 dark:text-red-400 group-hover:rotate-180 transition-transform duration-300" />

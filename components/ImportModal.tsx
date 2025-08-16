@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useRef } from 'react';
-import { X, Upload, FileText, Clipboard, AlertCircle } from 'lucide-react';
+import { X, Upload, FileText, Clipboard, AlertCircle, FileJson, FlaskConical, ClipboardPaste } from 'lucide-react';
 import { validateImportData, handleFileSelect } from '@/utils/importExport';
 import { Medication } from '@/types/medication';
 import toast from 'react-hot-toast';
@@ -13,7 +13,7 @@ interface ImportModalProps {
 }
 
 export default function ImportModal({ isOpen, onClose, onImport }: ImportModalProps) {
-  const [activeTab, setActiveTab] = useState<'file' | 'paste'>('file');
+  const [activeTab, setActiveTab] = useState<'file' | 'paste'>('paste');
   const [pastedJson, setPastedJson] = useState('');
   const [error, setError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -115,17 +115,6 @@ export default function ImportModal({ isOpen, onClose, onImport }: ImportModalPr
         {/* Tab Selection */}
         <div className="flex border-b border-slate-200 dark:border-slate-700">
           <button
-            onClick={() => setActiveTab('file')}
-            className={`flex-1 flex items-center justify-center space-x-2 px-4 py-3 transition-all ${
-              activeTab === 'file'
-                ? 'bg-blue-50 dark:bg-blue-950/30 text-blue-600 dark:text-blue-400 border-b-2 border-blue-600 dark:border-blue-400'
-                : 'text-gray-600 dark:text-gray-400 hover:bg-slate-50 dark:hover:bg-slate-800'
-            }`}
-          >
-            <FileText className="w-5 h-5" />
-            <span>Upload File</span>
-          </button>
-          <button
             onClick={() => setActiveTab('paste')}
             className={`flex-1 flex items-center justify-center space-x-2 px-4 py-3 transition-all ${
               activeTab === 'paste'
@@ -136,35 +125,21 @@ export default function ImportModal({ isOpen, onClose, onImport }: ImportModalPr
             <Clipboard className="w-5 h-5" />
             <span>Paste JSON</span>
           </button>
+          <button
+            onClick={() => setActiveTab('file')}
+            className={`flex-1 flex items-center justify-center space-x-2 px-4 py-3 transition-all ${
+              activeTab === 'file'
+                ? 'bg-blue-50 dark:bg-blue-950/30 text-blue-600 dark:text-blue-400 border-b-2 border-blue-600 dark:border-blue-400'
+                : 'text-gray-600 dark:text-gray-400 hover:bg-slate-50 dark:hover:bg-slate-800'
+            }`}
+          >
+            <FileText className="w-5 h-5" />
+            <span>Upload File</span>
+          </button>
         </div>
 
         <div className="p-6">
-          {activeTab === 'file' ? (
-            <div>
-              <div className="border-2 border-dashed border-slate-300 dark:border-slate-600 rounded-lg p-8 text-center">
-                <Upload className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-                <p className="text-gray-600 dark:text-gray-400 mb-4">
-                  Drop your JSON file here or click to browse
-                </p>
-                <input
-                  ref={fileInputRef}
-                  type="file"
-                  accept=".json,application/json"
-                  onChange={handleFileChange}
-                  className="hidden"
-                />
-                <button
-                  onClick={() => fileInputRef.current?.click()}
-                  className="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg shadow-md hover:shadow-lg transition-all duration-200"
-                >
-                  Choose File
-                </button>
-                <p className="text-xs text-gray-500 dark:text-gray-400 mt-4">
-                  Accepts .json files exported from Medication Scheduler
-                </p>
-              </div>
-            </div>
-          ) : (
+          {activeTab === 'paste' ? (
             <div className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
@@ -185,23 +160,80 @@ export default function ImportModal({ isOpen, onClose, onImport }: ImportModalPr
                 />
               </div>
               
-              <div className="flex gap-3">
+              <div className="space-y-3">
+                {/* Main action buttons - Paste and Import */}
+                <div className="flex gap-3">
+                  <button
+                    onClick={async () => {
+                      try {
+                        const text = await navigator.clipboard.readText();
+                        setPastedJson(text);
+                        toast.success('Pasted from clipboard');
+                      } catch (err) {
+                        toast.error('Failed to read clipboard');
+                      }
+                    }}
+                    className="flex-1 flex items-center justify-center space-x-2 px-4 py-2 
+                             bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-700 hover:to-purple-700
+                             text-white font-medium rounded-lg shadow-md hover:shadow-lg 
+                             transition-all duration-200"
+                  >
+                    <ClipboardPaste className="w-4 h-4" />
+                    <span>Paste</span>
+                  </button>
+                  <button
+                    onClick={handlePaste}
+                    disabled={!pastedJson.trim()}
+                    className="flex-1 flex items-center justify-center space-x-2 px-4 py-2 
+                             bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 
+                             disabled:from-gray-400 disabled:to-gray-400
+                             text-white font-medium rounded-lg shadow-md hover:shadow-lg 
+                             transition-all duration-200 disabled:cursor-not-allowed"
+                  >
+                    <FileJson className="w-4 h-4" />
+                    <span>Import Data</span>
+                  </button>
+                </div>
+                
+                {/* Load Sample button below */}
                 <button
                   onClick={handleSampleData}
-                  className="px-4 py-2 text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-950/30 
+                  className="w-full flex items-center justify-center space-x-2 px-4 py-2 
+                           text-blue-600 dark:text-blue-400 
+                           hover:bg-blue-50 dark:hover:bg-blue-950/30 
+                           border border-blue-300 dark:border-blue-700
                            font-medium rounded-lg transition-all duration-200"
                 >
-                  Load Sample
+                  <FlaskConical className="w-4 h-4" />
+                  <span>Load Sample Data</span>
                 </button>
+              </div>
+            </div>
+          ) : (
+            <div>
+              <div className="border-2 border-dashed border-slate-300 dark:border-slate-600 rounded-lg p-8 text-center">
+                <Upload className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+                <p className="text-gray-600 dark:text-gray-400 mb-4">
+                  Drop your JSON file here or click to browse
+                </p>
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept=".json,application/json"
+                  onChange={handleFileChange}
+                  className="hidden"
+                />
                 <button
-                  onClick={handlePaste}
-                  disabled={!pastedJson.trim()}
-                  className="flex-1 px-6 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 
-                           text-white font-medium rounded-lg shadow-md hover:shadow-lg 
-                           transition-all duration-200 disabled:cursor-not-allowed"
+                  onClick={() => fileInputRef.current?.click()}
+                  className="flex items-center space-x-2 px-6 py-2 bg-blue-600 hover:bg-blue-700 
+                           text-white font-medium rounded-lg shadow-md hover:shadow-lg transition-all duration-200"
                 >
-                  Import Data
+                  <FileText className="w-4 h-4" />
+                  <span>Choose File</span>
                 </button>
+                <p className="text-xs text-gray-500 dark:text-gray-400 mt-4">
+                  Accepts .json files exported from Medication Scheduler
+                </p>
               </div>
             </div>
           )}

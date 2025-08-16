@@ -88,8 +88,8 @@ export default function ShareModal({ isOpen, onClose, medications, defaultStartT
       >
         <div className="flex items-center justify-between p-6 border-b border-slate-200 dark:border-slate-700">
           <h2 className="text-xl font-semibold text-gray-800 dark:text-white flex items-center space-x-2">
-            <Share2 className="w-5 h-5" />
-            <span>Share Schedule</span>
+            <Download className="w-5 h-5" />
+            <span>Export Schedule</span>
           </h2>
           <button
             onClick={onClose}
@@ -103,7 +103,7 @@ export default function ShareModal({ isOpen, onClose, medications, defaultStartT
         <div className="p-6 space-y-4">
           <div>
             <p className="text-sm text-gray-600 dark:text-gray-400 mb-3">
-              Share your medication schedule as JSON data. You can copy it or use your device's share feature.
+              Export your medication schedule as JSON data. You can copy it to clipboard or download as a file.
             </p>
             
             <div className="bg-slate-50 dark:bg-slate-800/50 rounded-lg p-4 relative border border-slate-200 dark:border-slate-700">
@@ -113,10 +113,10 @@ export default function ShareModal({ isOpen, onClose, medications, defaultStartT
             </div>
           </div>
 
-          <div className="flex flex-col sm:flex-row gap-3">
+          <div className="flex justify-end gap-3">
             <button
               onClick={handleCopy}
-              className="flex-1 flex items-center justify-center space-x-2 px-4 py-2 bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 text-white rounded-lg shadow-md hover:shadow-lg transition-all"
+              className="flex items-center justify-center space-x-2 px-6 py-2 bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 text-white rounded-lg shadow-md hover:shadow-lg transition-all"
             >
               {copied ? (
                 <>
@@ -133,29 +133,20 @@ export default function ShareModal({ isOpen, onClose, medications, defaultStartT
 
             <button
               onClick={handleDownload}
-              className="flex-1 flex items-center justify-center space-x-2 px-4 py-2 bg-gradient-to-r from-violet-600 to-violet-500 hover:from-violet-700 hover:to-violet-600 text-white rounded-lg shadow-md hover:shadow-lg transition-all"
+              className="flex items-center justify-center space-x-2 px-6 py-2 bg-gradient-to-r from-violet-600 to-violet-500 hover:from-violet-700 hover:to-violet-600 text-white rounded-lg shadow-md hover:shadow-lg transition-all"
             >
               <Download className="w-4 h-4" />
               <span>Download</span>
             </button>
-
-            {canShare && (
-              <button
-                onClick={handleShare}
-                className="flex-1 flex items-center justify-center space-x-2 px-4 py-2 bg-gradient-to-r from-emerald-600 to-emerald-500 hover:from-emerald-700 hover:to-emerald-600 text-white rounded-lg shadow-md hover:shadow-lg transition-all"
-              >
-                <Share2 className="w-4 h-4" />
-                <span>Share</span>
-              </button>
-            )}
           </div>
 
           <div className="text-xs text-slate-500 dark:text-slate-400 border-t border-slate-200 dark:border-slate-700 pt-4">
-            <p className="font-semibold mb-1">How to import:</p>
+            <p className="font-semibold mb-1">How to import this schedule:</p>
             <ol className="list-decimal list-inside space-y-1">
-              <li>Copy the JSON data or download the file</li>
-              <li>Click the Import button in the app</li>
-              <li>Either paste the JSON directly or upload the file</li>
+              <li>Copy the JSON data above or download it as a file</li>
+              <li>Open the Import modal using the Import button</li>
+              <li>Paste the JSON in the "Paste JSON" tab or upload the file in the "Upload File" tab</li>
+              <li>Click "Import Data" to load your medications</li>
             </ol>
           </div>
         </div>
