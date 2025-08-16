@@ -1,10 +1,17 @@
 import type { Metadata, Viewport } from "next";
-import { Inter } from "next/font/google";
+import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 
-const inter = Inter({
+const geist = Geist({
   subsets: ["latin"],
   display: "swap",
+  variable: "--font-geist",
+});
+
+const geistMono = Geist_Mono({
+  subsets: ["latin"],
+  display: "swap",
+  variable: "--font-geist-mono",
 });
 
 export const metadata: Metadata = {
@@ -12,6 +19,11 @@ export const metadata: Metadata = {
   description: "Never miss a dose with our intelligent medication scheduler. Track multiple medications, set dosing intervals, and get a clear 24-hour schedule.",
   keywords: "medication scheduler, dose tracker, pill reminder, medication management, health tracker",
   authors: [{ name: "Medication Scheduler App" }],
+  icons: {
+    icon: "/medication-scheduler-logo.png",
+    shortcut: "/medication-scheduler-logo.png",
+    apple: "/medication-scheduler-logo.png",
+  },
   openGraph: {
     title: "Medication Scheduler",
     description: "Track your medications and never miss a dose",
@@ -40,7 +52,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={`${inter.className} antialiased`}>
+      <body className={`${geist.variable} ${geistMono.variable} font-sans antialiased`}>
         {children}
       </body>
     </html>

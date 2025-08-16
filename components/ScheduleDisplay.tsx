@@ -218,7 +218,7 @@ export default function ScheduleDisplay({ schedule, firstDoseTime, hoveredMedica
               )}
               <div
                 className={`
-                border rounded-lg p-4 transition-all duration-200
+                border rounded-lg p-3 transition-all duration-200
                 ${isCurrent 
                   ? 'border-blue-400 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/30 dark:to-indigo-950/30 dark:border-blue-600 shadow-md' 
                   : hasHighlightedMedication
@@ -227,10 +227,10 @@ export default function ScheduleDisplay({ schedule, firstDoseTime, hoveredMedica
                 }
               `}
             >
-              <div className="flex items-center justify-between mb-3">
-                <div className="flex items-center space-x-3">
+              <div className="flex items-center justify-between mb-2">
+                <div className="flex items-center space-x-2">
                   <span className={`
-                    text-lg font-semibold
+                    text-base font-semibold
                     ${isCurrent 
                       ? 'text-blue-600 dark:text-blue-400' 
                       : 'text-gray-800 dark:text-white'
@@ -239,12 +239,12 @@ export default function ScheduleDisplay({ schedule, firstDoseTime, hoveredMedica
                     {formatTimeDisplay(group.time)}
                   </span>
                   {group.isNextDay && (
-                    <span className="text-xs bg-amber-100 dark:bg-amber-900/50 text-amber-700 dark:text-amber-300 px-2 py-1 rounded-full font-medium">
+                    <span className="text-xs bg-amber-100 dark:bg-amber-900/50 text-amber-700 dark:text-amber-300 px-1.5 py-0.5 rounded-full font-medium">
                       Next Day
                     </span>
                   )}
                   {isCurrent && (
-                    <span className="text-xs bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300 px-2 py-1 rounded-full font-medium animate-pulse">
+                    <span className="text-xs bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300 px-1.5 py-0.5 rounded-full font-medium animate-pulse">
                       Current
                     </span>
                   )}

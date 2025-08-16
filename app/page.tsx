@@ -103,10 +103,17 @@ export default function Home() {
           
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-3xl sm:text-4xl font-bold text-gray-800 dark:text-white mb-2">
-                Medication Scheduler
-              </h1>
-              <p className="text-gray-600 dark:text-gray-400">
+              <div className="flex items-center space-x-3 mb-2">
+                <img 
+                  src="/medication-scheduler-logo.png" 
+                  alt="Medication Scheduler Logo" 
+                  className="w-10 h-10 sm:w-12 sm:h-12 rounded-lg shadow-sm"
+                />
+                <h1 className="text-3xl sm:text-4xl font-bold text-gray-800 dark:text-white">
+                  Medication Scheduler
+                </h1>
+              </div>
+              <p className="text-gray-600 dark:text-gray-400 ml-12 sm:ml-14">
                 Track your medications and never miss a dose
               </p>
             </div>
