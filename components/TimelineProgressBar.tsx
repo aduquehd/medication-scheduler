@@ -149,6 +149,34 @@ export default function TimelineProgressBar({ schedule }: TimelineProgressBarPro
             const position = (timeInMinutes / dayTotalMinutes) * 100;
             const status = getDoseStatus(time);
             
+            // Check if this label would overlap with the previous one
+            const prevTime = index > 0 ? uniqueTimes[index - 1] : null;
+            let showLabel = true;
+            let alternatePosition = false;
+            
+            if (prevTime) {
+              const [prevHour, prevMinute] = prevTime.split(':').map(Number);
+              const prevTimeInMinutes = prevHour * 60 + prevMinute;
+              const prevPosition = (prevTimeInMinutes / dayTotalMinutes) * 100;
+              
+              // If labels are too close (less than 5% apart), alternate or hide
+              if (Math.abs(position - prevPosition) < 5) {
+                // For very close times, only show label for every other marker
+                alternatePosition = index % 2 === 1;
+                // If there are 3+ consecutive close times, hide some labels
+                if (index < uniqueTimes.length - 1) {
+                  const nextTime = uniqueTimes[index + 1];
+                  const [nextHour, nextMinute] = nextTime.split(':').map(Number);
+                  const nextTimeInMinutes = nextHour * 60 + nextMinute;
+                  const nextPosition = (nextTimeInMinutes / dayTotalMinutes) * 100;
+                  if (Math.abs(nextPosition - position) < 5) {
+                    // Three close together - only show first and last
+                    showLabel = index % 3 === 0;
+                  }
+                }
+              }
+            }
+            
             return (
               <div
                 key={index}
@@ -164,10 +192,14 @@ export default function TimelineProgressBar({ schedule }: TimelineProgressBarPro
                       : 'bg-yellow-500 border-yellow-600'
                   }`}
                 />
-                {/* Time label */}
-                <span className="absolute top-6 left-1/2 -translate-x-1/2 text-xs text-gray-600 dark:text-gray-400 whitespace-nowrap">
-                  {time}
-                </span>
+                {/* Time label - only show if not overlapping */}
+                {showLabel && (
+                  <span className={`absolute left-1/2 -translate-x-1/2 text-xs text-gray-600 dark:text-gray-400 whitespace-nowrap ${
+                    alternatePosition ? 'top-10' : 'top-6'
+                  }`}>
+                    {time}
+                  </span>
+                )}
               </div>
             );
           })}
@@ -187,15 +219,15 @@ export default function TimelineProgressBar({ schedule }: TimelineProgressBarPro
 
       {/* Next Dose Card */}
       {nextDose && (
-        <div className="mt-6 p-4 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-lg text-white">
+        <div className="mt-4 p-3 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-lg text-white">
           <div className="text-center">
-            <div className="text-sm uppercase tracking-wider opacity-90 mb-1">
+            <div className="text-xs uppercase tracking-wider opacity-90">
               Next Dose In
             </div>
-            <div className="text-3xl font-bold mb-2">
+            <div className="text-2xl font-bold my-1">
               {timeUntilNext}
             </div>
-            <div className="text-sm font-medium opacity-95">
+            <div className="text-xs font-medium opacity-95">
               {nextDoseMedications}
             </div>
           </div>

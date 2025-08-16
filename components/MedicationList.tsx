@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { Medication } from '@/types/medication';
-import { Pill, Calendar, RefreshCw, RotateCw, Edit2 } from 'lucide-react';
+import { Pill, Calendar, RefreshCw, RotateCw, Edit2, ChevronDown, ChevronUp } from 'lucide-react';
 import { formatTimeDisplay } from '@/utils/timeCalculations';
 import toast from 'react-hot-toast';
 import EditMedicationModal from './EditMedicationModal';
@@ -19,6 +19,7 @@ export default function MedicationList({ medications, onRemove, onUpdate, onHove
   const [editingMedication, setEditingMedication] = useState<Medication | null>(null);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [selectedMedicationIds, setSelectedMedicationIds] = useState<Set<string>>(new Set());
+  const [isExpanded, setIsExpanded] = useState(true);
 
   // Sort medications by start time
   const sortedMedications = [...medications].sort((a, b) => {
@@ -70,10 +71,25 @@ export default function MedicationList({ medications, onRemove, onUpdate, onHove
   return (
     <div className="bg-white dark:bg-slate-900 rounded-xl shadow-lg hover:shadow-xl p-4 sm:p-6 transition-all duration-200 border border-slate-100 dark:border-slate-800">
       <div className="flex items-center justify-between mb-3 sm:mb-4">
-        <h2 className="text-lg sm:text-xl font-semibold text-gray-800 dark:text-white">
-          Your Medications
-        </h2>
-        {medications.length > 0 && onClearAll && (
+        <button
+          onClick={() => setIsExpanded(!isExpanded)}
+          className="lg:cursor-default flex items-center space-x-2 group"
+        >
+          <h2 className="text-lg sm:text-xl font-semibold text-gray-800 dark:text-white">
+            Your Medications
+          </h2>
+          {medications.length > 0 && (
+            <span className="text-sm text-gray-500 dark:text-gray-400">({medications.length})</span>
+          )}
+          <div className="lg:hidden">
+            {isExpanded ? (
+              <ChevronUp className="w-5 h-5 text-gray-600 dark:text-gray-400" />
+            ) : (
+              <ChevronDown className="w-5 h-5 text-gray-600 dark:text-gray-400" />
+            )}
+          </div>
+        </button>
+        {medications.length > 0 && onClearAll && isExpanded && (
           <button
             onClick={onClearAll}
             className="flex items-center space-x-2 px-3 py-1.5 rounded-lg
@@ -87,9 +103,11 @@ export default function MedicationList({ medications, onRemove, onUpdate, onHove
         )}
       </div>
       
-      {/* Mobile: Compact list view, Desktop: 2 cards per row grid */}
-      <div className="space-y-2 sm:grid sm:grid-cols-2 sm:gap-3 sm:space-y-0">
-        {sortedMedications.map((medication) => (
+      {/* Collapsible content - always visible on desktop */}
+      <div className={`${isExpanded ? 'block' : 'hidden lg:block'}`}>
+        {/* Mobile: Compact list view, Desktop: 2 cards per row grid */}
+        <div className="space-y-2 sm:grid sm:grid-cols-2 sm:gap-3 sm:space-y-0">
+          {sortedMedications.map((medication) => (
           <div
             key={medication.id}
             className={`relative flex flex-row p-3 sm:flex-col sm:p-4 rounded-lg border-2
@@ -200,14 +218,15 @@ export default function MedicationList({ medications, onRemove, onUpdate, onHove
               </div>
             </div>
           </div>
-        ))}
-      </div>
-      
-      {/* Footer */}
-      <div className="mt-3 sm:mt-4 pt-3 sm:pt-4 border-t border-slate-200 dark:border-slate-700">
-        <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400">
-          Total medications: {medications.length}
-        </p>
+          ))}
+        </div>
+        
+        {/* Footer */}
+        <div className="mt-3 sm:mt-4 pt-3 sm:pt-4 border-t border-slate-200 dark:border-slate-700">
+          <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400">
+            Total medications: {medications.length}
+          </p>
+        </div>
       </div>
 
       {/* Edit Modal */}
