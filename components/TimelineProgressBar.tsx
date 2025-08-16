@@ -194,14 +194,6 @@ export default function TimelineProgressBar({ schedule }: TimelineProgressBarPro
                       : 'bg-yellow-500 border-yellow-600'
                   }`}
                 />
-                {/* Time label - only show if not overlapping */}
-                {showLabel && (
-                  <span className={`absolute left-1/2 -translate-x-1/2 text-xs text-gray-600 dark:text-gray-400 whitespace-nowrap ${
-                    alternatePosition ? 'top-10' : 'top-6'
-                  }`}>
-                    {time}
-                  </span>
-                )}
               </div>
             );
           })}
@@ -216,8 +208,6 @@ export default function TimelineProgressBar({ schedule }: TimelineProgressBarPro
         </div>
       </div>
 
-      {/* Spacer for time labels */}
-      <div className="h-8" />
 
       {/* Next Dose Card */}
       {nextDose && (
