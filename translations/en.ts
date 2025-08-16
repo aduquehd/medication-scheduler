@@ -120,6 +120,11 @@ export const en = {
   // Footer
   footerLine1: "Remember to consult with your healthcare provider about your medication schedule.",
   footerLine2: "This tool is for organizational purposes only and does not replace professional medical advice.",
+  
+  // Demo Mode
+  demoMode: "Demo Mode",
+  demoModeDesc: "Using sample data for demonstration",
+  exitDemo: "Exit Demo",
 } as const;
 
 export type TranslationKey = keyof typeof en;

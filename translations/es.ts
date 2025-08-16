@@ -120,4 +120,9 @@ export const es = {
   // Footer
   footerLine1: "Recuerda consultar con tu proveedor de salud sobre tu horario de medicamentos.",
   footerLine2: "Esta herramienta es solo para fines organizativos y no reemplaza el consejo médico profesional.",
+  
+  // Demo Mode
+  demoMode: "Modo Demo",
+  demoModeDesc: "Usando datos de muestra para demostración",
+  exitDemo: "Salir del Demo",
 } as const;

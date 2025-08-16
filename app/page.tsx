@@ -36,6 +36,13 @@ export default function Home() {
   const [showAddModal, setShowAddModal] = useState(false);
   const [showClearModal, setShowClearModal] = useState(false);
   const [hoveredMedicationIds, setHoveredMedicationIds] = useState<string[]>([]);
+  const [isDemoMode, setIsDemoMode] = useState(false);
+
+  useEffect(() => {
+    // Check if in demo mode
+    const demoMode = localStorage.getItem('demoMode') === 'true';
+    setIsDemoMode(demoMode);
+  }, []);
 
   useEffect(() => {
     // Check for saved theme preference or default to light mode
@@ -67,6 +74,24 @@ export default function Home() {
     importMedications(medications, defaultStartTime);
   };
 
+  const exitDemoMode = () => {
+    // Remove demo mode flag
+    localStorage.removeItem('demoMode');
+    
+    // Restore backup data if it exists
+    const backup = localStorage.getItem('medicationSchedule_backup');
+    if (backup) {
+      localStorage.setItem('medicationSchedule', backup);
+      localStorage.removeItem('medicationSchedule_backup');
+    } else {
+      // Clear all data if no backup
+      localStorage.removeItem('medicationSchedule');
+    }
+    
+    // Reload the page to refresh the data
+    window.location.reload();
+  };
+
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900">
@@ -84,6 +109,28 @@ export default function Home() {
           duration: 3000,
         }}
       />
+      
+      {/* Demo Mode Banner */}
+      {isDemoMode && (
+        <div className="bg-yellow-500 text-black px-4 py-2">
+          <div className="container mx-auto max-w-7xl flex items-center justify-between">
+            <div className="flex items-center space-x-2">
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              <span className="font-medium text-sm">
+                {t.demoMode || 'Demo Mode'} - {t.demoModeDesc || 'Using sample data for demonstration'}
+              </span>
+            </div>
+            <button
+              onClick={exitDemoMode}
+              className="px-3 py-1 bg-black/20 hover:bg-black/30 rounded text-sm font-medium transition-colors"
+            >
+              {t.exitDemo || 'Exit Demo'}
+            </button>
+          </div>
+        </div>
+      )}
       
       <div className="container mx-auto px-4 pb-8 pt-4 max-w-7xl">
         {/* Header */}
